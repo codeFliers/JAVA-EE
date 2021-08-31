@@ -191,9 +191,106 @@ public class HandleResultServlet extends HttpServlet {
 ```
 Then there is the Ground class ...
 
+**What is include() ?**  
+*include()* is an usefull method from RequestDispatcher that give the possibility to include code from an other file.  
+For example, in web development HTML code are use by many pages and to not write it down each time, you can reuse it: 
+```
+<footer>
+    i am a footer
+</footer>
+``` 
+``` 
+out.println("<strong>Sport autorisé(s): </strong>"+res);
+out.println("</p>");
 
+RequestDispatcher rd = request.getRequestDispatcher("/footer.html");
+rd.include(request, response);
 
+out.println("</body>");
+out.println("</html>");
+out.flush();
+out.close();
+```
+```
+<html>
+   <head>
+      <meta charset="UTF-8">
+      <title>Confirmation réception terrain info</title>
+   </head>
+   <body>
+      <p>
+         <strong>Code terrain: </strong>10<br>
+         <strong>Sport autorisé(s): </strong>1 
+      </p>
+      <footer>
+         i am a footer
+      </footer>
+   </body>
+</html>
+```
+ **Redirection**  
+We can use **redirection** if we want to do a new URL Request. We can then redirect to a servlet or a webpage :
+```
+  <form action="RedirectionServlet" method="Get">
+    <input type="submit" name="RedirectionServlet" value="RedirectionServlet">
+  </form>
 
-   
-   
+  <form action="RedirectionServlet" method="Get">
+    <input type="submit" name="RedirectionWebsite" value="RedirectionWebsite">
+  </form>
+```
+```
+  @WebServlet(name = "RedirectionServlet", value = "/RedirectionServlet")
+public class RedirectionServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if (request.getParameter("RedirectionWebsite") != null) {
+            response.sendRedirect("https://www.google.fr");
 
+        } else if (request.getParameter("RedirectionServlet") != null) {
+            response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+            response.setHeader("Location", request.getContextPath() + "/test.html");
+        }
+        //...
+    }
+```
+```
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+   </head>
+   <body>
+      <p>HELLO redirection test</p>
+   </body>
+</html>
+ ```
+ 
+ **How to handle error**  
+It is possible to use the method "*sendError()*" from HttpServletResponse:
+ ```
+protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+   response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); //500
+}
+ ```
+ 
+ To add personalization (web.xml and a custom HTML page "pageError500.html" that work like a redirection):  
+ ```
+ <error-page>
+   <error-code>500</error-code>
+   <location>/pageError500.html</location>
+ </error-pages>
+ ```
+ 
+ We could add this code to a previous example:
+ 
+ ```
+ //...
+}else {
+      //SC_NOT_FOUND : Resource not found
+      response.sendError(HttpServletResponse.SC_NOT_FOUND, "The parameter is null and so the resource asked");
+}
+ ```
+ 
+ 
