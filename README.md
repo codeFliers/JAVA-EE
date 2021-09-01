@@ -293,4 +293,94 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) {
 }
  ```
  
- 
+**Asynchronous servlet**
+
+Asynchronous mean that multiple part of a program can work on their own in parallel. This functionality is handled by "Threads" but
+a program does have a limited pool of it and here come two issues :  
+First, like i said they are limited in numbers. And secondly, the power available to handle them is limited too : resources exhaustion.  
+In a Web project, where we can face many users at the same time, it is an issue.  
+
+To solve the pool issue, we can use *asynchronous servlet*. We will need one of the main threads and as it take notice of the HTTP Request, it will then charge a "child" thread
+to this specific task. While the child is working (child labor is ok), the parent return to the initial pool to be available again.
+
+A simple example: 
+
+```
+@WebServlet(urlPatterns = "/asyncServlet", asyncSupported = true)
+public class TestAsyncServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request,
+                         HttpServletResponse response) throws ServletException, IOException {
+        final long startTime = System.nanoTime();
+        //the request is now asynchronous
+        final AsyncContext asyncContext = request.startAsync(request, response);
+
+        System.out.println(1);
+        //background / child thread
+        new Thread() {
+
+            @Override
+            public void run() {
+                try {
+                    System.out.println(3);
+                    //The required facilities in order for the application
+                    //to further interact with the current request and response are accessible
+                    ServletResponse response = asyncContext.getResponse();
+                    response.setContentType("text/plain");
+                    PrintWriter out = response.getWriter();
+                    Thread.sleep(2000);
+                    out.print("Work completed. Time elapsed: " + (System.nanoTime() - startTime));
+                    out.flush();
+                    //complete the asynchronous request processing
+                    asyncContext.complete();
+                    System.out.println(4);
+                } catch (IOException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }.start();
+        //the response should not be committed - and also not sent to the client - when doGet() method execution completes.
+        System.out.println(2);
+        //the original HTTP thread will return to the HTTP thread pool and will become ready to handle another incoming request.
+    }
+}
+```
+First, we need the servlet to be asynchronous : *asyncSupported = true*.  
+Then, we have to give to our http request an asynchronous context : *final AsyncContext asyncContext = request.startAsync(request, response)*.  
+What is going to happen is that the thread which started the HTTP request will create an asyncContext object, start a child thread and - end - the doGet method.
+It is important to understand that the task is not his : after sysout (1), we don't go to the (3) but at the end of the method (2).  
+At this moment, the main thread completed his job and may return to the HTTP thread pool. While in the other end, the child thread will use the asyncContext object, take all the time it need and enventualy finish his duty before being released : *asyncContext.complete()*.
+
+To know when the child thread is one, we can add a listener to the asyncContext : 
+
+```
+        asyncContext.addListener(new AsyncListener() {
+            @Override
+            public void onTimeout(AsyncEvent event) throws IOException {
+                System.out.println("on time out");
+            }
+            @Override
+            public void onStartAsync(AsyncEvent event) throws IOException {
+                System.out.println("onStartAsync()");
+            }
+            @Override
+            public void onError(AsyncEvent event) throws IOException {
+                System.out.println("onerror");
+            }
+            @Override
+            public void onComplete(AsyncEvent event) throws IOException {
+                System.out.println("onComplete");
+            }
+        }, request, response);
+    }
+```
+We will then have : 
+```
+1
+2
+3
+4
+onComplete
+```
+
+
