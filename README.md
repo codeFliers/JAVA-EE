@@ -382,5 +382,136 @@ We will then have :
 4
 onComplete
 ```
+For now, we handle the main Thread but not the number of child thread.  
+In this example, we will have a limited amount of children threads. Client will be able to download a file (fake) but only 10 bytes at a time for a total of 100 bytes.  
+We are limited to 3 background threads and will use a limited FIFO table "LinkedBlockingQueue". When a client download 10 bytes and is not at 100 yet, it return to the tails of the table before downloading again.
+![asyncExample](https://user-images.githubusercontent.com/58827656/131699397-a62592b1-1b18-4852-a912-fc61030c42c8.png)
+
+```
+//Remote Client class
+import javax.servlet.AsyncContext;
+public class RemoteClient {
+    private final AsyncContext asyncContext;
+    private int bytesSent;
+    //Save th
+    public RemoteClient(AsyncContext asyncContext) {
+        this.asyncContext = asyncContext;
+    }
+
+    public AsyncContext getAsyncContext() {
+        return asyncContext;
+    }
+
+    public void incrementBytesSent() {
+        this.bytesSent += 10;
+    }
+
+    public int getBytesSent() {
+        return bytesSent;
+    }
+}
+```
+```
+//Web servlet
+//asyncSupported = true /!\
+@WebServlet(urlPatterns = "/streamingAsyncServlet", asyncSupported = true)
+public class StreamingAsyncServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request,
+                         HttpServletResponse response) throws ServletException, IOException {
+        //Link asynchronous context to our request
+        AsyncContext asyncContext = request.startAsync(request, response);
+        //Time out if something is wrong
+        asyncContext.setTimeout(10 * 60 * 1000);
+        //It will happen each time a HTTP Request is sent from startStreamingAsyncServlet.html
+        Dispatcher.addRemoteClient(new RemoteClient(asyncContext));
+    }
+}
+```
+
+```
+@WebListener
+public class Dispatcher implements ServletContextListener {
+
+    //MAX CHILDREN THREAD ALLOWED
+    private static final int PROCESSING_THREAD_COUNT = 3;
+    //Dynamic FIFO array of 'RemoteClient' limited to the PROCESSING_THREAD_COUNT
+    private static final BlockingQueue<RemoteClient>
+            REMOTE_CLIENTS = new LinkedBlockingQueue<RemoteClient>();
+    //Execute a child thread from a limited pool (PROCESSING_THREAD_COUNT)
+    private final Executor executor = Executors.newFixedThreadPool(PROCESSING_THREAD_COUNT);
+
+    public static void addRemoteClient(RemoteClient remoteClient) {
+        System.out.println("add remote client");
+        REMOTE_CLIENTS.add(remoteClient);
+    }
+
+    @Override
+    public void contextInitialized(ServletContextEvent event) {
+        int count = 0;
+        //THE STATIC COUNT WILL HELP TO INITIALISE THE DIFFERENT BACKGROUND THREADS WHILE WE HAD NEW REMOTECLIENT
+        //1 to 3 CHILDREN THREADS MAX
+        while (count < PROCESSING_THREAD_COUNT) {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        System.out.println("1");
+
+                        RemoteClient remoteClient;
+                        try {
+                            // take out the oldest REMOTECLIENT in the waiting lines (TAILS)
+                            //
+                            //(Productor - Consumer) pattern  (this call blocks until a client is available)
+                            remoteClient = REMOTE_CLIENTS.take();
+                        } catch (InterruptedException e1) {
+                            throw new RuntimeException("Interrupted while waiting for remote clients");
+                        }
+
+                        AsyncContext asyncContext = remoteClient.getAsyncContext();
+                        ServletResponse response = asyncContext.getResponse();
+                        response.setContentType("text/plain");
+
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e1) {
+                            throw new RuntimeException(e1);
+                        }
+
+                        // increment bytes sent by 10
+                        remoteClient.incrementBytesSent();
+
+                        try {
+                            // send bytes to client
+                            PrintWriter out = response.getWriter();
+                            //10, 20, 30, [...], 100
+                            out.print("Already sent " + remoteClient.getBytesSent() + " bytes");
+                            out.flush();
+
+                            // check if we have already sent the 100 bytes to this client
+                            if (remoteClient.getBytesSent() < 100) {
+                                // if not, put the client again in the queue
+                                REMOTE_CLIENTS.put(remoteClient);
+                            } else {
+                                // if the 100 bytes are sent, the response is complete
+                                //RELEASE OF THE CHILD THREAD
+                                asyncContext.complete();
+                            }
+
+                            ////RELEASE OF THE CHILD THREAD IF AN ERROR OCCURE
+                        } catch (Exception e) {
+                            // discard current client
+                            asyncContext.complete();
+                        }
+                    }
+                }
+            });
+            count++;
+        }
+    }
+```
+(<a href="https://www.hackerearth.com/practice/notes/asynchronous-servlets-in-java/">example from here</a>)  
+Now our main threads will not focus on the task and our children will not be unlimited and consume too much resources.   
+
 
 
