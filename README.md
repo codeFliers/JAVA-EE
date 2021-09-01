@@ -292,16 +292,69 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) {
       response.sendError(HttpServletResponse.SC_NOT_FOUND, "The parameter is null and so the resource asked");
 }
  ```
+**Update a JSP page (NOT ASYNC)**
+
+We have a basic form in a JSP file "test.jsp". It will be handled by a Servlet "TestServlet" that will change the parameter value and get back the result to "test.jsp".
+
+```
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Test</title>
+</head>
+<body>
+    <form method="get" action="TestServlet">
+        <input type="text" name="inputText" />
+        <br/>
+        <input type="submit" value="Validate"/>
+    </form>
+    <div id="response">
+        <p>Response: </p>
+        <br/>
+        <% if(application.getAttribute("inputText") != null)  { %>
+        <%= application.getAttribute("inputText")%>
+        <%}%>
+    </div>
+</body>
+</html>
+```
+
+```
+@WebServlet(name = "TestServlet", value = "/TestServlet")
+public class TestServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String message = "";
+        System.out.println("doGet");
+        if(request.getParameter("inputText") != null) {
+            System.out.println("not null");
+            message = "DoGet: "+request.getParameter("inputText");
+
+            ServletContext sc = request.getServletContext();
+            sc.setAttribute("inputText", message);
+            response.sendRedirect("test.jsp");
+        }
+    }
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    }
+}
+```
+
+((((((((NEXT WITH AJAX))))))))))
  
 **Asynchronous servlet**
 
 Asynchronous mean that multiple part of a program can work on their own in parallel. This functionality is handled by "Threads" but
 a program does have a limited pool of it and here come two issues :  
 First, like i said they are limited in numbers. And secondly, the power available to handle them is limited too : resources exhaustion.  
-In a Web project, where we can face many users at the same time, it is an issue.  
+In a Web project, where we can face many users at the same time, it is an issue.  We don't want our thread blocked and doing nothing while waiting for a response.  
 
-To solve the pool issue, we can use *asynchronous servlet*. We will need one of the main threads and as it take notice of the HTTP Request, it will then charge a "child" thread
-to this specific task. While the child is working (child labor is ok), the parent return to the initial pool to be available again.
+Two example of waiting time:  
+-wait a data to construct a response (ie. data base access).  
+-wait an event to occure to construct a response (ie. need an information from an other client).
+
+To solve the pool issue, we can use an *asynchronous servlet*. We will need one of the main threads and as it take notice of the HTTP Request, it will then charge a "child" thread to this specific task. While the child is working (child labor is ok), the parent return to the initial HTTP pool to be available again.
 
 A simple example: 
 
@@ -324,7 +377,7 @@ public class TestAsyncServlet extends HttpServlet {
                 try {
                     System.out.println(3);
                     //The required facilities in order for the application
-                    //to further interact with the current request and response are accessible
+                    //to further interact with the current request and response, we make them accessible
                     ServletResponse response = asyncContext.getResponse();
                     response.setContentType("text/plain");
                     PrintWriter out = response.getWriter();
@@ -346,7 +399,7 @@ public class TestAsyncServlet extends HttpServlet {
 }
 ```
 First, we need the servlet to be asynchronous : *asyncSupported = true*.  
-Then, we have to give to our http request an asynchronous context : *final AsyncContext asyncContext = request.startAsync(request, response)*.  
+Then, we have to give to our http request an asynchronous context to gain new functionalities: *final AsyncContext asyncContext = request.startAsync(request, response)*.  
 What is going to happen is that the thread which started the HTTP request will create an asyncContext object, start a child thread and - end - the doGet method.
 It is important to understand that the task is not his : after sysout (1), we don't go to the (3) but at the end of the method (2).  
 At this moment, the main thread completed his job and may return to the HTTP thread pool. While in the other end, the child thread will use the asyncContext object, take all the time it need and enventualy finish his duty before being released : *asyncContext.complete()*.
@@ -372,7 +425,6 @@ To know when the child thread is one, we can add a listener to the asyncContext 
                 System.out.println("onComplete");
             }
         }, request, response);
-    }
 ```
 We will then have : 
 ```
@@ -382,7 +434,7 @@ We will then have :
 4
 onComplete
 ```
-For now, we handle the main Thread but not the number of child thread.  
+For now, we handle the main Thread but not the number of children threads.  
 In this example, we will have a limited amount of children threads. Client will be able to download a file (fake) but only 10 bytes at a time for a total of 100 bytes.  
 We are limited to 3 background threads and will use a limited FIFO table "LinkedBlockingQueue". When a client download 10 bytes and is not at 100 yet, it return to the tails of the table before downloading again.
 ![asyncExample](https://user-images.githubusercontent.com/58827656/131699397-a62592b1-1b18-4852-a912-fc61030c42c8.png)
