@@ -565,5 +565,130 @@ public class Dispatcher implements ServletContextListener {
 (<a href="https://www.hackerearth.com/practice/notes/asynchronous-servlets-in-java/">example from here</a>)  
 Now our main threads will not focus on the task and our children will not be unlimited and consume too much resources.   
 
+**Servlet and AJAX**
+
+We load "index.jsp", the function "getMessages()" start a first time after "onload" et update the content of the current page (div id="content") and update the asyncContext from the "doGet" function.  
+
+Then, when a user press submit it start the "postMessage()" function that retrieve the form content, empty it and create an ajax request that send a post request that the "doPost()" retrieve.  
+
+This last one retrieve every asyncContexts (different pages), retrieve the content of the new request POST, update the variable that contains the last messages and put it to production for every pages (contexts).  
+
+A setInterval will call again the "getMessages()" function every second and update the content from the postMessage update.
+
+```
+<form>
+    <table>
+        <tr>
+            <td>Your name:</td>
+            <td><input type="text" id="name" name="name"/></td>
+        </tr>
+        <tr>
+            <td>Your shout:</td>
+            <td><input type="text" id="message" name="message" /></td>
+        </tr>
+        <tr>
+            <td><input type="button" onclick="postMessage();" value="SHOUT" /></td>
+        </tr>
+    </table>
+</form>
+<h2> Current Shouts </h2>
+<div id="content">
+    <% if (application.getAttribute("messages") != null) {%>
+    <%= application.getAttribute("messages")%>
+    <% }%>
+</div>
+<script>
+    function postMessage() {
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("POST", "shoutServlet?t="+new Date(), false);
+        xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        var nameText = escape(document.getElementById("name").value);
+        var messageText = escape(document.getElementById("message").value);
+        document.getElementById("message").value = "";
+        xmlhttp.send("name="+nameText+"&message="+messageText);
+    }
+    var messagesWaiting = false;
+    /*
+    This function establish an AJAX connection and update the index.jsp page with the lastest known information.
+    It update the async context too in ShoutServlet
+     */
+    function getMessages(){
+        if(!messagesWaiting){
+            alert("getmessage")
+            messagesWaiting = true;
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange=function(){
+                if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+                    messagesWaiting = false;
+                    var contentElement = document.getElementById("content");
+                    contentElement.innerHTML = xmlhttp.responseText + contentElement.innerHTML;
+                }
+            }
+            //make contact with the servlet to add a new context
+            xmlhttp.open("GET", "shoutServlet?t="+new Date(), true);
+            xmlhttp.send();
+        }
+    }
+    //update the content after each post request
+    setInterval(getMessages, 1000);
+```
+
+```
+@WebServlet(urlPatterns = {"/shoutServlet"}, asyncSupported=true)
+public class ShoutServlet extends HttpServlet {
+    //every brownser page (index.jsp) running
+    private List<AsyncContext> contexts = new LinkedList<>();
+    @Override
+    //add new context (browser page)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        System.out.println("do get");
+        final AsyncContext asyncContext = request.startAsync(request, response);
+        asyncContext.setTimeout(10 * 60 * 1000);
+        contexts.add(asyncContext);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        //make a copy of the context
+        List<AsyncContext> asyncContexts = new ArrayList<>(this.contexts);
+        //empty the original context
+        this.contexts.clear();
+        //get the new form information
+        String name = request.getParameter("name");
+        String message = request.getParameter("message");
+        String htmlMessage = "<p><b>" + name + "</b><br/>" + message + "</p>";
+
+        //Update the request with a new information
+        ServletContext sc = request.getServletContext();
+        if (sc.getAttribute("messages") == null) {
+            sc.setAttribute("messages", htmlMessage);
+        } else {
+            String currentMessages = (String) sc.getAttribute("messages");
+            sc.setAttribute("messages", htmlMessage + currentMessages);
+        }
+
+        //work in the background
+        for (AsyncContext asyncContext : asyncContexts) {
+            try (PrintWriter writer = asyncContext.getResponse().getWriter()) {
+                writer.println(htmlMessage);
+                writer.flush();
+                asyncContext.complete();
+            } catch (Exception ex) {
+            }
+        }
+    }
+}
+```
+
+*Summary*:  
+We load "index.jsp", the function "getMessages()" start a first time after "onload", update the content of the current page (div id="content") and update the asyncContext array from the "doGet" function.
+
+Then, when a user press submit it start the "postMessage()" function that retrieve the form content, empty it, create an ajax request that send a post request that the "doPost()" retrieve.
+
+This last one retrieve every asyncContexts (different browser pages), retrieve the content of the new request POST, update the variable that contains the last message and put it to production for every pages (contexts).
+
+A setInterval() function will call again the "getMessages()" every second and update the content from the postMessage update.  
 
 
