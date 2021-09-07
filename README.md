@@ -402,6 +402,7 @@ First, we need the servlet to be asynchronous : *asyncSupported = true*.
 Then, we have to give to our http request an asynchronous context to gain new functionalities: *final AsyncContext asyncContext = request.startAsync(request, response)*.  
 What is going to happen is that the thread which started the HTTP request will create an asyncContext object, start a child thread and - end - the doGet method.
 It is important to understand that the task is not his : after sysout (1), we don't go to the (3) but at the end of the method (2).  
+
 At this moment, the main thread completed his job and may return to the HTTP thread pool. While in the other end, the child thread will use the asyncContext object, take all the time it need and enventualy finish his duty before being released : *asyncContext.complete()*.
 
 To know when the child thread is one, we can add a listener to the asyncContext : 
@@ -690,5 +691,7 @@ Then, when a user press submit it start the "postMessage()" function that retrie
 This last one retrieve every asyncContexts (different browser pages), retrieve the content of the new request POST, update the variable that contains the last message and put it to production for every pages (contexts).
 
 A setInterval() function will call again the "getMessages()" every second and update the content from the postMessage update.  
+(<a href="https://www.oracle.com/webfolder/technetwork/tutorials/obe/java/async-servlet/async-servlets.html">example from here</a>)  
+
 
 
