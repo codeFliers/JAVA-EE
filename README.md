@@ -698,6 +698,10 @@ We can either user "cookie" (client side) or "session" (server side).
 
 For the cookies, they contains "key:value" data format and are send by the server to the client navigator. When the client send an new request, the server may remember the client from the previous cookie. The server can update the cookie before sending it back to the client.
 
+Client --> Serveur = request heading -> cookie(s)
+Serveur --> Client = response heading -> Set-Cookie(s) 
+
+JSP Page:  
 ```
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
@@ -715,7 +719,7 @@ For the cookies, they contains "key:value" data format and are send by the serve
 </body>
 </html>
 ```
-
+Create cookie:  
 ```
 @WebServlet(name = "CreationDUnCookie", value = "/CreationDUnCookie")
 public class CreationDUnCookieServlet extends HttpServlet {
@@ -738,7 +742,7 @@ public class CreationDUnCookieServlet extends HttpServlet {
 }
 
 ```
-
+Read cookie(s):  
 ```
 @WebServlet(name = "LectureDUnCookie", value = "/LectureDUnCookie")
 public class LectureDUnCookieServlet extends HttpServlet {
@@ -758,6 +762,15 @@ public class LectureDUnCookieServlet extends HttpServlet {
         doGet(request, response);
     }
 }
+```
+Example: 
+```
+Cookie: Idea-653b643a
+=> Valeur: bd05758f-4531-4714-aca6-83cac26ffbf9
+Cookie: JSESSIONID
+=> Valeur: 4E758E3F7EF22981E32D4FB48C9B40A0
+Cookie: cle
+=> Valeur: valeur
 ```
 
 **SESSION**
