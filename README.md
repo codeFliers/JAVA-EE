@@ -340,8 +340,6 @@ public class TestServlet extends HttpServlet {
     }
 }
 ```
-
-((((((((NEXT WITH AJAX))))))))))
  
 **Asynchronous servlet**
 
@@ -692,6 +690,78 @@ This last one retrieve every asyncContexts (different browser pages), retrieve t
 
 A setInterval() function will call again the "getMessages()" every second and update the content from the postMessage update.  
 (<a href="https://www.oracle.com/webfolder/technetwork/tutorials/obe/java/async-servlet/async-servlets.html">example from here</a>)  
+
+**COOKIE**
+
+On internet, we need some persistance to manage some activities around the user. For example: remembering who is connected right now, save the shopping cart ...  
+We can either user "cookie" (client side) or "session" (server side).
+
+For the cookies, they contains "key:value" data format and are send by the server to the client navigator. When the client send an new request, the server may remember the client from the previous cookie. The server can update the cookie before sending it back to the client.
+
+```
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JSP - Hello World</title>
+</head>
+<body>
+<h1><%= "Hello World!" %>
+</h1>
+<br/>
+<a href="CreationDUnCookie">Création d'un cookie</a>
+<br/>
+<a href="LectureDUnCookie">Lecture d'un cookie</a>
+</body>
+</html>
+```
+
+```
+@WebServlet(name = "CreationDUnCookie", value = "/CreationDUnCookie")
+public class CreationDUnCookieServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Cookie cookie = new Cookie("key", "value");
+
+        cookie.setVersion(1);
+        cookie.setComment("first cookie");
+        cookie.setMaxAge(1000);
+        cookie.setHttpOnly(true);
+
+        response.addCookie(cookie);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        doGet(request, response);
+    }
+}
+
+```
+
+```
+@WebServlet(name = "LectureDUnCookie", value = "/LectureDUnCookie")
+public class LectureDUnCookieServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Cookie [] arrCookie = request.getCookies();
+        if(arrCookie != null) {
+            for(Cookie cookie : arrCookie) {
+                System.out.println("Cookie: "+cookie.getName());
+                System.out.println("=> Valeur: "+cookie.getValue());
+            }
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        doGet(request, response);
+    }
+}
+```
+
+**SESSION**
+
 
 
 
