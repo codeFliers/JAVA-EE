@@ -773,7 +773,7 @@ Cookie: cle
 => Valeur: valeur
 ```
 
-**SESSION**
+**SESSION**  
 Session save the information on the server. When the user register for the first time, the server give back an unique ID via a cookie to the user.  
 Next, the server will be able to know who is who with this ID.
 
@@ -795,14 +795,12 @@ L'attribut prenom est: Jean
 (<a href="https://github.com/codeFliers/JAVA-EE/tree/main/Session%20url%20rewrite%20example">example here</a>)
 
 
-**Filter**
-
-A filter catch up the HTTP Requests which it is interest in to do a "filter" action, pre-treatment before the resource access or after the servlet treatment.  
-It is possible to use one or more filter and associate them to certain servlets.  
+**Filter**  
+A filter catch up the HTTP Requests which it is interest in to do a "filter" action. It can happen as a pre-treatment before the resource access or after the servlet treatment.  
+It is possible to use one or more filters and associate them to certain servlets.  
 First, the filter is initiate (Filter.init) and eventually destroy (Filter.destroy).  
-The treatment of the filter itself go by the function "doFilter()". This, once treated will start an other "doFilder()" on the previous method param "FilterChain chain" , so it can call the next filter or the direct access to the resource if there is no more.  
-
-A filter can be declared by a descriptor or an annotation. For this last one, there is no garantee of the treatment order.
+The treatment of the filter itself go by the function "doFilter()". This, once treated will start an other "doFilder()" on the previous method param "FilterChain chain" , so it can call the next filter or have a direct access to the resource if there is no more filter.  
+A filter can be declared by a descriptor or an annotation. For the last one, there is no garantee of the treatment order and a descriptor must be use.
 
 
 
