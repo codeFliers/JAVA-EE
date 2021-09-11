@@ -804,7 +804,7 @@ A filter can be declared by a descriptor or an annotation. For the last one, the
 It is interesting to use to handle pre-connection, to execute some protection/security check on users input...  
 
 For example, if we want to use two filters : 
-web.xml  
+*web.xml*  
 ```
     <filter-mapping>
         <filter-name>Filter1</filter-name>
@@ -816,7 +816,7 @@ web.xml
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 ```
-Filter1  
+*Filter1*  
 ```
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
@@ -824,7 +824,7 @@ Filter1
         chain.doFilter(request, response);
     }
 ```
-Filter2  
+*Filter2*  
 ```
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
@@ -832,7 +832,7 @@ Filter2
         chain.doFilter(request, response);
     }
 ```
-AServlet  
+*AServlet*  
 ```
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -844,7 +844,7 @@ AServlet
 **EVENT**  
 Exactly like event listeners, ie "onMouseClick Listener", when an event happen to a class it is possible to catch it for multiple purpose.
 Depending of the "context", we have to implement different interface to catch what we're interested in. It can be context from the app, session or http request, 
-Example:
+*Example*:
 ```
 public class ExempleListener implements ServletRequestListener, ServletContextListener, HttpSessionListener, HttpSessionAttributeListener {
 ```
@@ -864,12 +864,12 @@ To have a well organized MVC Pattern, JSP Pages should be accessible only by a S
 To do that, the JSP file have to be protected by being put in the WEB-INF and not into the webapp folder. Then, there is two ways to access it : create a RequestDispatcher or update the descriptor.
 
 RequestDispatcher example:  
-Index.jsp  
+*Index.jsp*  
 ```
 <br/>
 <a href="AccessJSPProtegeeServlet">JSP PROTECTED Access</a> <br/>
 ```
-The servlet:  
+*The servlet*  
 ```
 u/Override
 protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException { 
@@ -903,15 +903,110 @@ The main directive is :
 To import like in .java:   
 ``` <%@ page import="java.util.Date" %> ```
 
-To create and access custom balise:   
+To create and access custom tag:   
 ``` 
 <%@ taglib prefix="prefix" tagdir="/WEB_INF/tags" %>
 <!-- ...-->
-<prefix:baliseName/>
+<prefix:tagName/>
 ```
 
 To include (footer example):  
-<!—folder htmlPagesFragments in WEB-INF-->
-```<%@ include file="../htmlPagesFragments/footer.html" %>```
+```
+<!-- folder htmlPagesFragments in WEB-INF -->
+<%@ include file="../htmlPagesFragments/footer.html" %>
+```
+
+**SCRIPT**
+
+To write down java code into the JSP pages, just like in PHP, we have to use special tags to contain it.  
+When it is not a statement:  
+```
+<% java code here %>
+```  
+If it's a statement:  
+```  
+<%= java statement here %>
+```  
+If it's the variables / methods zone:  
+```
+<%!  %>
+```  
+
+When a conversion happen, the code will automatically change. Example:  
+```
+out.write("<!DOCTYPE html>\r\n");
+out.write(...);
+for(int k = 0; k <=10 ; k++) {
+out.print(k);
+}
+out.write(\r\n");
+out.write("</body>\r\n");
+out.write("</html>");
+```
+
+In this next example, we will create a list of sport in a servlet and draw the content of it into the JSP page:  
+*index.jsp* 
+```
+<br/>
+<a href="AccessObjectServlet">Acces Object Servlet</a>
+<br/>
+```  
+*AccessObjectServlet*   
+```
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //Create an object list
+        List<Sport> myArr = new ArrayList<>();
+        myArr.add(new Sport("Tennis"));
+        myArr.add(new Sport("Foot"));
+        myArr.add(new Sport("Swimming"));
+        myArr.add(new Sport("Rugby"));
+        myArr.add(new Sport("Running"));
+
+        //Save the object list and link it to an attribute to the request
+        request.setAttribute("Sport", myArr);
+
+        //prepare to redirect the request to an URL
+        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/drawList.jsp");
+        //redirect it
+        rd.forward(request, response);
+    }
+```  
+*drawList.jsp*  
+```
+<%-- Directives --%>
+<%@ page import="com.example.CookiTest.Sport" %>
+<%@ page import="java.util.List" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
+<%!
+    //Variables and methods
+    private List<Sport> listSport;
+%>
+
+<html>
+<head>
+    <title>My sport list</title>
+</head>
+<body>
+    <h2>SPORT LIST: </h2>
+    <% listSport = (List<Sport>) request.getAttribute("Sport"); %>
+    <% if(listSport != null) { %>
+        <label for="sport-select">Choose a sport:</label>
+        <select name="sports" id="sport-select">
+        <option><%= "" %></option>
+            <% for(Sport sport : listSport) {%>
+                    <option><%= sport.getNomSport() %></option>
+            <% } %>
+        </select>
+    <% }else { %>
+        <p>Sport list is empty</p>
+    <% } %>
+</body>
+</html>
+```  
+*The result*:  
+![image](https://user-images.githubusercontent.com/58827656/132954880-bfc3ff9a-c91b-40b6-b877-ff7aec7f2a48.png)
+
+
 
 
