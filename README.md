@@ -859,4 +859,59 @@ public void requestInitialized(ServletRequestEvent sre) {
 }
 ```
 
+**JSP in general**  
+To have a well organized MVC Pattern, JSP Pages should be accessible only by a Servlet process and not directly through an URL. The servlet have to delegate the "generating response" to the JSP.
+To do that, the JSP file have to be protected by being put in the WEB-INF and not into the webapp folder. Then, there is two ways to access it : create a RequestDispatcher or update the descriptor.
+
+RequestDispatcher example:  
+Index.jsp  
+```
+<br/>
+<a href="AccessJSPProtegeeServlet">JSP PROTECTED Access</a> <br/>
+```
+The servlet:  
+```
+u/Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException { 
+    RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/pageProtegee.jsp"); 
+    rd.forward(request, response); 
+}
+```
+The protected JSP  
+```
+<html>
+<head>
+ <title>You're on a protected page</title>  
+</head>  
+<body>  
+<h1>Protected page not directly accessible by modifying the URL</h1>  
+</body>  
+</html>
+```
+
+When a request imply the exécution of a JSP (ie: servlet -> jsp) then two things happen.
+Transformation of the jsp to a java file before the compilation into a class.
+
+**Directives**  
+There are 3 types of directives:  
+-pages, taglib and include.
+
+These give caracteristics to JSP pages to bring it up to the container during the "transformation" phase.  
+The main directive is :  
+```<%@ page contentType="text/html;charset=UTF-8" language="java" %>```
+
+To import like in .java:   
+``` <%@ page import="java.util.Date" %> ```
+
+To create and access custom balise:   
+``` 
+<%@ taglib prefix="prefix" tagdir="/WEB_INF/tags" %>
+<!-- ...-->
+<prefix:baliseName/>
+```
+
+To include (footer example):  
+<!—folder htmlPagesFragments in WEB-INF-->
+```<%@ include file="../htmlPagesFragments/footer.html" %>```
+
 
