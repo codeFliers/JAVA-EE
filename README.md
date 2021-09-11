@@ -841,4 +841,22 @@ AServlet
     }
 ```
 
+**EVENT**  
+Exactly like event listeners, ie "onMouseClick Listener", when an event happen to a class it is possible to catch it for multiple purpose.
+Depending of the "context", we have to implement different interface to catch what we're interested in. It can be context from the app, session or http request, 
+Example:
+```
+public class ExempleListener implements ServletRequestListener, ServletContextListener, HttpSessionListener, HttpSessionAttributeListener {
+```
+When we detect an http request:
+```
+
+@Override
+public void requestInitialized(ServletRequestEvent sre) {
+    System.out.println("REQUESTINITIALIZED");
+    ServletContext servletContext = sre.getServletContext();
+
+}
+```
+
 
