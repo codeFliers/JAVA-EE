@@ -801,6 +801,44 @@ It is possible to use one or more filters and associate them to certain servlets
 First, the filter is initiate (Filter.init) and eventually destroy (Filter.destroy).  
 The treatment of the filter itself go by the function "doFilter()". This, once treated will start an other "doFilder()" on the previous method param "FilterChain chain" , so it can call the next filter or have a direct access to the resource if there is no more filter.  
 A filter can be declared by a descriptor or an annotation. For the last one, there is no garantee of the treatment order and a descriptor must be use.
+It is interesting to use to handle pre-connection, to execute some protection/security check on users input...  
 
+For example, if we want to use two filters : 
+web.xml  
+```
+    <filter-mapping>
+        <filter-name>Filter1</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>Filter2</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+```
+Filter1  
+```
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
+        //do something to an attribute for example
+        chain.doFilter(request, response);
+    }
+```
+Filter2  
+```
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws ServletException, IOException {
+        //do something more to the same attribute for example
+        chain.doFilter(request, response);
+    }
+```
+AServlet  
+```
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //do something with the parameter after it being filtered
+        doGet(request, response);
+    }
+```
 
 
