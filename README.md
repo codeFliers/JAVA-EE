@@ -1089,8 +1089,27 @@ Error message with flush commented:
 Error message with flush decommented:  
 ![image](https://user-images.githubusercontent.com/58827656/133046868-82e0d27b-40df-4c6f-88a4-8c640967b987.png)  
 
-...
 
+It is possible to handle general error from "*transformation errors*" in the *web.xml* file.  
+In this simple example, we will handle specificaly the '500' error code:  
+```
+<%-- Will generate a transformation error (500) --%>
+<%= This is an error (no quotation marks) %>
+```  
+*error500.jsp*  
+```
+<body>
+    <h2>ERROR 500</h2>
+</body>
+```
+
+*web.xml*  
+```
+    <error-page>
+        <error-code>500</error-code>
+        <location>/WEB-INF/error500.jsp</location>
+    </error-page>
+```
 
 
                                                                 
