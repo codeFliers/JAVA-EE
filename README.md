@@ -1014,7 +1014,7 @@ Error can happen during the transformation(1) or the compilation(2).
 (1) bad directives or scriptlet  
 (2) error in the code itself (exceptions)
 
-We can handle compilation error by redirecting error to a dedicated handler page.  
+Beside "try/catch", we can handle compilation error by redirecting error to a dedicated handler page.  
 Example:
 
 *index.jsp*  
@@ -1111,6 +1111,109 @@ In this simple example, we will handle specificaly the '500' error code:
     </error-page>
 ```
 
+**Use of fragment**
 
-                                                                
+Fragment mean that we can reuse file structure multiple time in other files. We already saw include.  
+When we want to include an HTML page for example, we can use static include:  
+```
+<%@ include file="/WEB-INF/footer.html"%>
+```  
+Or a dynamic include. We can't update the request from it. We gonna use what is called "standard action":  
+```
+<jsp:include page="header.jsp"></jsp:include>
+```
+Example:  
+*index.jsp*  
+```
+<br/>
+<a href="ConnectionServlet">Static and dynamic inclusion example</a>
+<br/>
+```
+*ConnectionServlet.java*  
+```
+ protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+     response.setContentType("text/plain");
+     HttpSession session = request.getSession();
+     session.setAttribute("userConnect", "invited");
+     response.sendRedirect(request.getContextPath() + "/ListOfAvailableSportsServlet");
+ }
+```  
+*ListOfAvailableSportsServlet.java*  
+```
+ protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+     //Create an object list
+     List<Sport> myArr = new ArrayList<>();
+     myArr.add(new Sport("Tennis"));
+     myArr.add(new Sport("Foot"));
+     myArr.add(new Sport("Swimming"));
+     myArr.add(new Sport("Rugby"));
+     myArr.add(new Sport("Running"));
+
+     //Save the object list and link it to an attribute to the request
+     request.setAttribute("Sport", myArr);
+     request.setAttribute("Ressource", "header.jsp");
+     //prepare to redirect the request to an URL
+     RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/drawAvailableSports.jsp");
+     //redirect it
+     rd.forward(request, response);
+ }
+```  
+*drawAvailableSports.jsp*  
+```
+<%@ page import="com.example.CookiTest.Sport" %>
+<%@ page import="java.util.List" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Available Sports</title>
+</head>
+<body>
+    <!-- header (dynamic include from a variable) -->
+    <% String ressource = "/WEB-INF/"+ (String) request.getAttribute("Ressource"); %>
+    <jsp:include page="<%=ressource%>"></jsp:include>
+
+    <p>List of sports: </p>
+    <% List<Sport> myList = (List<Sport>) request.getAttribute("Sport"); %>
+    <label for="sport-select">Choose a sport:</label>
+    <select name="sports" id="sport-select">
+        <option value="">Choose something</option>
+        <% for(Sport sport : myList) { %>
+        <% String sportName = sport.getNomSport(); %>
+        <option value="<%= sportName %>"><%= sportName %></option>
+        <% } %>
+    </select>
+
+    <!-- static include -->
+    <%@ include file="/WEB-INF/footer.html"%>
+</body>
+</html>
+```  
+*header.jsp*  
+```
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>HEADER</title>
+</head>
+<body>
+    <header>
+        <h2>Welcome to <%= session.getAttribute("userConnect") %></h2>
+    </header>
+</body>
+</html>
+```  
+*footer.html*  
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Footer</title>
+</head>
+<body>
+    <footer>FOOTER PAGE</footer>
+</body>
+</html>
+```  
+        
 
