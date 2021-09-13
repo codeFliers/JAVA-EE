@@ -1008,5 +1008,90 @@ In this next example, we will create a list of sport in a servlet and draw the c
 ![image](https://user-images.githubusercontent.com/58827656/132954880-bfc3ff9a-c91b-40b6-b877-ff7aec7f2a48.png)
 
 
+**ERROR HANDLING**
 
+Error can happen during the transformation(1) or the compilation(2).  
+(1) bad directives or scriptlet  
+(2) error in the code itself (exceptions)
+
+We can handle compilation error by redirecting error to a dedicated handler page.  
+Example:
+
+*index.jsp*  
+```
+<br/>
+<a href="ErrorServlet">Error handler test</a>
+<br/>
+```
+
+*ErrorServlet.java*  
+```
+ @Override
+ protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+     //prepare to redirect the request to an URL
+     RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/drawErrorMess.jsp");
+     //redirect it
+     rd.forward(request, response);
+ }  
+```
+
+*drawErrorMess.jsp*  
+```  
+<%--
+    errorPage must link to the jsp page
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" errorPage="./handleError.jsp" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+    <p>There is an error in this page (we are in drawErrorMess.jsp)</p>
+    <%
+        String str = null;
+        out.flush();
+        /*
+            This line alone will send the complet result when it's done
+            wherease flush will send what he already have at the moment of the function call (buffer dump).
+
+            This means that flush() will send out <p>There is an error ...</p> before failing the write(str) because it is null
+            wherease with flush commented, we will not have the <p>...</p>
+         */
+        out.write(str);
+    %>
+</body>
+</html>
+```                                                                
+*handleError.jsp*  
+```
+<%--
+    isErrorPage must be TRUE
+--%>
+
+<%@ page contentType="text/html;charset=UTF-8" language="java" isErrorPage="true" %>
+<html>
+<head>
+    <title>Error</title>
+</head>
+<body>
+    <!-- exception is accessible only if isErrorPage is set to 'true' -->
+    <h2>An error happened (we are at handleError.jsp)</h2>
+    <p><%= exception.getClass().getName() %></>p>
+    <p><%= exception.getMessage() %></p>
+    <a href="<%= request.getContextPath()%>/index.jsp">clic here to return to index.html</a>
+</body>
+</html>
+```  
+<!> Note errorPage and isErrorPage <!>  
+
+Error message with flush commented:  
+![image](https://user-images.githubusercontent.com/58827656/133046819-6f76b785-4f20-4486-b0ef-cbfbd82ae5f8.png)  
+Error message with flush decommented:  
+![image](https://user-images.githubusercontent.com/58827656/133046868-82e0d27b-40df-4c6f-88a4-8c640967b987.png)  
+
+...
+
+
+
+                                                                
 
