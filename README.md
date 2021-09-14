@@ -1296,6 +1296,7 @@ To work with the object "marin":
     </body>
 
 ```
+This notation is named "EL (Expression Langage)"
 
 An example:  
 
@@ -1403,6 +1404,88 @@ public class Person {
         return this.weight;
     }
 }
+```
+**Expression Langage (EL)**
 
+It is a way to replace the use of java in JSP pages. It gives the possibility to handle java object and logical expression but no if or for.  
+It is easier to access variable from different contexts and easier to handle error as if it is null, it will not create an error but just return null.
+
+Example with a session (sessionScope):  
+**  
+```
+<br/>
+<a href="SessionServlet">Result by java and EL</a>
+<br/>
+```  
+
+*SessionServlet*  
+```
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("text/plain");
+        HttpSession session = request.getSession();
+
+        Person person = new Person();
+        person.setAge(80);
+        person.setName("O'Neil");
+        person.setSurName("Peter");
+        Address address = new Address("New Address");
+        person.setAddress(address);
+
+        session.setAttribute("person", person);
+
+        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/resultJavaAndEl.jsp");
+        rd.forward(request, response);
+    }
+```  
+
+*resultJavaAndEl*  
+```
+    <!-- Need to handle errors and typography is more complicated-->
+    <% Person person = (Person) session.getAttribute("person"); %>
+    <% if (person != null) { %>
+        <h1>Result from the person using java</h1>
+        <p>Name: <%= person.getName() %></p>
+        <p>Surname: <%= person.getSurName() %></p>
+        <p>Age: <%= person.getAge() %></p>
+        <% if(person.getAddress() != null) { %>
+            <p>Address: <%= person.getAddress().name %></p>
+        <% } %>
+    <% } %>
+    
+    <br/><br/><br/>
+
+    <!-- Error will return a 'null', easier to avoir error and easier typography -->
+    <h1>Result from the person using EL</h1>
+    <p>Name: ${sessionScope.person.getName()}</p>
+    <p>Surname: ${sessionScope.person.getSurName()}</p>
+    <p>Age: ${sessionScope.person.getAge()}</p>
+    <p>Address: <%= person.getAddress().name %></p>
+```  
+Result:  
+![image](https://user-images.githubusercontent.com/58827656/133282465-e869fc3a-84d5-459d-b658-e7a0597dfb61.png)
+
+If we comment:  
+```
+//Address address = new Address("New Address");
+//person.setAddress(address);
+```
+And use this:  
+``` <p>Address: <%= person.getAddress() != null ? person.getAddress():"no address" %></p>  ``` 
+
+We have this result instead: "Address: no address"
+
+**JSTL**
+//
+
+### JDBC and JPA - data persistence ###
+
+Oracle wrote what is called "Specifications" / standards (JSR xxx) on how technologies should work.  
+**JDBC** (*Java DataBase Connectivity*) is one result of it. It is a Java API use to connect application with database. No matter which database is used, it will work exactly the same (no to marginal code change).  
+
+**JPA** (*Java Persistence API*) is an other specification use by different java framework like **Hiberate**. These frameworks are called **ORM** (*Object Relational Mapping*) and give the possibility to work with database using object and without SQL request.  
+
+**JDBC**
+
+Companies behind database provide different types of "drivers" that implements the different interface of the JDBC to make it work. 
 
 
