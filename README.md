@@ -1215,5 +1215,194 @@ Example:
 </body>
 </html>
 ```  
-        
+
+**JAVA Bean and Standard Action**  
+
+A "Bean" is a java object respecting 4 rules:  
+-Being public  
+-Implementing the Interface "Serializable"  
+-Having a default constructor (mandatory declared if other constructors exist)
+-Having a 'couple' of "getter / setter" for every variables members of the class.
+These methods must respect the typography: set / get + NameOfTheVariable  
+
+Example:  
+``` 
+Public class MyBeanClass implements Serializable {
+              private String myVar;
+	public MyBeanClass() {
+		//
+               }
+
+	public MyBeanClass(String str) {
+		//
+	}
+	public void setMyVar(String varValue) {
+		this.myVar = varValue;
+}
+	public String getMyVar() {
+	return this.myVar;
+}
+}
+```
+
+
+
+A Bean is attached to a "context" : page, request, session or application.
+An application means that it is available for every pages on the programs.
+For example, "page" means it is only accessible in the jsp file where it is declared.
+Something important, it is a java class made to be reused.
+Then, a bean is pre-existing or have to be made.
+
+Pre-Existing:
+```
+<jsp:useBean 
+   id="marin" 
+   beanName="marin" 
+   scope="request" 
+   type="org.paumard.cours.model.Marin"
+/>
+
+```
+
+**id**: name of the object instance to retrieve or create. It give the possibility to manipulate the object.  
+**beanName**: this attribut means that we're using a bean already made.  
+**scope**: it is the bean interaction range put by the scope parameter.  
+**type**:  address of the object class. If it is not there, check out *class*.
+
+To create: 
+
+```
+<jsp:useBean 
+    id="marin" 
+    scope="page"  
+    class="org.paumard.cours.model.Marin">
+
+    <jsp:setProperty name="marin" property="name"    value="Surcouf"/>
+    <jsp:setProperty name="marin" property="surName" param="surName"/>
+    <jsp:setProperty name="marin" property="age"    param="age"/>
+</jsp:useBean>
+
+```  
+The use the class parameter rather than "**type**" and the lack of "beanName" means that we're creating a bean.  
+The attribute "name" have to match the "**id"**.  
+**setProperty** will call setters (setName, setSurName and setAge), impose a value for "name" and will retrieve in the http request the data of surName and age (param).
+
+
+
+To work with the object "marin":
+```
+    <body>
+        <p>Nom = ${marin.nom}</p>
+    </body>
+
+```
+
+An example:  
+
+*Index.jsp*
+```
+<br/>
+<a href="Redirect1Servlet">Action standard, exemple 1</a>
+<br/>
+```
+*Redirect1Servlet*
+```
+protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    request.setAttribute("ageValueParam", 18);
+    RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/actionStandard.jsp");
+    rd.forward(request, response);
+}
+```  
+*actionStandard.jsp*  
+```
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Action Standard JSP</title>
+</head>
+<body>
+    <% int weight = 100; %>
+    <jsp:useBean
+            id="person"
+            scope="page"
+            class="com.example.CookiTest.Person">
+
+            <jsp:setProperty name="person" property="name" value="MyNameValue"/>
+            <jsp:setProperty name="person" property="surName" value="MySurnameValue"/>
+            <jsp:setProperty name="person" property="age" param="ageValueParam"/>
+            <jsp:setProperty name="person" property="weight" value="<%= weight %>"/>
+    </jsp:useBean>
+    <p>Value of the parameter 'ageValueParam': <%= request.getAttribute("ageValueParam")%><p/><br/>
+    <h2>Hello ${person.name} (<jsp:getProperty name="person" property="name"/>)</h2>
+    <p>You're surname is ${person.surName} (<jsp:getProperty name="person" property="surName"/>)</p>
+    <p>And your age is ${person.age} (<jsp:getProperty name="person" property="age"/>)</p>
+    <p>Your weight is ${person.weight} (<jsp:getProperty name="person" property="weight"/>)</p>
+
+    <!-- You can not directly pass an Object using jsp:include or :forward -->
+    <%--
+    <p>Forward jsp:
+    <jsp:forward page="/WEB-INF/forwardJSP.jsp">
+        <jsp:param name="person" value="${person.name}"/>
+    </jsp:forward> </p>
+    --%>
+
+    <jsp:include page="/WEB-INF/footer.html"></jsp:include>
+</body>
+</html>
+```  
+*forward.jsp*  
+```
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+    <p>Forward</p>
+    <p><%= request.getParameter("person") %></p>
+</body>
+</html>
+```  
+*Person.java*  
+```
+package com.example.CookiTest;
+
+public class Person {
+    private String name;
+    private String surName;
+    private int age;
+    private int weight;
+
+    public Person() {
+        //
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setSurName(String surname) {
+        this.surName = surname;
+    }
+    public void setAge(int age) {
+        this.age = age;
+    }
+    public void setWeight(int weight) {
+        this.weight = weight;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+    public String getSurName() {
+        return this.surName;
+    }
+    public int getAge() {
+        return this.age;
+    }
+    public int getWeight() {
+        return this.weight;
+    }
+}
+
+
 
