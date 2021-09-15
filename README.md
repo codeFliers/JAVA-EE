@@ -1488,4 +1488,10 @@ Oracle wrote what is called "Specifications" / standards (JSR xxx) on how techno
 
 Companies behind database provide different types of "drivers" that implements the different interface of the JDBC to make it work. 
 
+To comunicate with a database, a connection have to be establish. Then, three types of request exist:  
+-*Statement* (used to Create, alter, drop (...) db. It does have bad performance so it have to be use occasionaly. No parameter !)  
+-*PreparedStatement* (better perf and parameters accepted) 
+-*CallableStatement* (execute stored procedures)  
+
+
 
