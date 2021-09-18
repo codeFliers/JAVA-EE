@@ -1493,5 +1493,96 @@ To comunicate with a database, a connection have to be establish. Then, three ty
 -*PreparedStatement* (better perf and parameters accepted) 
 -*CallableStatement* (execute stored procedures)  
 
+**How to connect to databases**  
+
+*CODE EXAMPLE FOR ORACLE*  
+```
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("text/plain");
+        PrintWriter out = response.getWriter();
+
+        //CALL THE DRIVER
+        try {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Connection conn = null;
+        try {
+            //MAKE THE CONNECTION (database name = "test", pw = "test")
+            conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","test","test");
+            out.println(conn.isClosed()?"close":"open");
+    	} catch (SQLException e) {
+	    e.printStackTrace();
+    	}
+	conn.close();
+	out.close();
+}
+```  
+
+*Example of Statement && preparedStatement*
+```
+[...]
+            //count of inserted data
+            int count = stmt.executeUpdate("insert into Person values(4,'Irfan','50000')");
+
+            String sql = "select * from Person where id=1";
+            //or executeQuery(sql) that is better to use for SELECT query
+            boolean isResultSet = stmt.execute(sql);
+
+            if (isResultSet) {
+                ResultSet rs = stmt.getResultSet();
+                //only 1 result, if is enough
+                if (rs.next()) {
+                    String id = rs.getString("id");
+                    String name = rs.getString("name");
+                    String surname = rs.getString("surname");
+                    // ID: 1, NAME: Irfan SURNAME: 50000
+                    System.out.println("ID: " + id + ", NAME: " + name + " SURNAME: " + surname);
+                }
+            }
+
+            String preparedStatementStr = "SELECT * FROM Person WHERE id=? AND name=?";
+            PreparedStatement ps = conn.prepareStatement(preparedStatementStr);
+            ps.setInt(1, 28);
+            ps.setString(2, "toto");
+            //ID: 28, NAME: toto SURNAME: supertoto
+            ResultSet rs = ps.executeQuery();
+
+
+            while (rs.next()) {
+                String id = rs.getString("id");
+                String name = rs.getString("name");
+                String surname = rs.getString("surname");
+                //ID: 1, NAME: Irfan SURNAME: 50000
+                System.out.println("ID: " + id + ", NAME: " + name + " SURNAME: " + surname);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        Client client = new Client();
+        client.setName("Super");
+        client.setSurName("Louis");
+        
+        String sqlInsert = "insert into Person(name, surname) values (?, ?)";
+
+        try {
+            PreparedStatement ps2 = conn.prepareStatement(sqlInsert);
+            ps2.setString(1, client.getName());
+            ps2.setString(2, client.getSurname());
+
+            int count = ps2.executeUpdate();
+
+            if (count > 0) {
+                System.out.println("good " + count);
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+```
 
 
