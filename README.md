@@ -1585,4 +1585,132 @@ To comunicate with a database, a connection have to be establish. Then, three ty
     }
 ```
 
+It is possible to create an object from a resultset: 
+```
+    while (rs.next()) {
+	String id = rs.getString("id");
+	String name = rs.getString("name");
+	String surname = rs.getString("surname");
+	//check if the last rs was null (surname here)
+	if(rs.wasNull()) {
+	    surname = "is null";
+	}
+	//ID: 1, NAME: Irfan SURNAME: 50000
+	System.out.println("ID: " + id + ", NAME: " + name + " SURNAME: " + surname);
+
+	Client client = new Client();
+	client.setName(name);client.setSurName(surname);
+	List<Client> listClient = new ArrayList<>();
+	listClient.add(client);
+    }
+```
+
+If a primitive type is null, then the result will be 0. If it is an object type (String, Date...), the result will be "null".
+
+**Transaction**
+
+A transaction describe every steps from the beginning of an activity until it is done (ie when you buy something on the internet).  
+With SQL, a transaction happen when you ask or do something to a database. When something fail during the transaction, you can avort what you already pushed.
+For example, if your process have to do 5 things to be successfull but that last one failed, then you may want to come back to the 4th or even cancel everything you did from the first one to the last action.
+
+Different types of transaction mod exist:  
+-dirty read (you are interacting with db data that have not been yet validated by an other transaction (commit))  
+-not reproductible read (first transaction read a line followed up by an other transaction reading the same line. The first update the value as the second one is doing the same)  
+-ghost read (first transaction recover a resultset from x sql request just before an other transaction update data concerning the same x. If the first transaction sql happen again, it will more data)  
+*Example of a simple transaction*:  
+```  
+@WebServlet(name = "TransactionServlet", value = "/TransactionServlet")
+public class TransactionServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //CALL THE DRIVER
+        try {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Connection conn = null;
+        try {
+            //MAKE THE CONNECTION
+            conn = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "test", "test");
+            //if we use 'transaction principle' or not
+            conn.setAutoCommit(false);
+            //get and set transaction isolation mod (dirty, not reproductible and ghost)
+            int transactionIsolationMod = Connection.TRANSACTION_SERIALIZABLE;
+            conn.setTransactionIsolation(transactionIsolationMod);
+            //LIFO Array
+            Queue<Savepoint> queue = Collections.asLifoQueue(new ArrayDeque<>());
+            //create a savepoint before any sql operation
+            Savepoint save1 = conn.setSavepoint();
+            //save it to our LIFO Array (ie: array{save1, save2})
+            queue.add(save1);
+
+            //Create 2 client object
+            Client client = new Client();
+            client.setName("Super");client.setSurName("Louis");
+            Client client2 = new Client();
+            client2.setName("Not Super");client2.setSurName("Still Louis");
+            Client client3 = new Client();
+            client3.setName("");client3.setSurName("");
+            //save them into a client array
+            List<Client> clientList = new ArrayList<>();
+            clientList.add(client);clientList.add(client2);clientList.add(client3);
+
+            String sqlInsert = "insert into Person(name, surname) values (?, ?)";
+
+            for(Client myClient : clientList) {
+                boolean bool = true;
+                try {
+                    PreparedStatement ps = conn.prepareStatement(sqlInsert);
+                    ps.setString(1, myClient.getName());
+                    ps.setString(2, myClient.getSurname());
+
+                    int count = ps.executeUpdate();
+                    System.out.println(myClient.getName()+" "+myClient.getSurname());
+                    if(myClient.getName().equals("") && myClient.getSurname().equals("")) {
+                        System.out.println("Error, name and surname are empties (rollback)");
+                        System.out.println(myClient.getName()+" "+myClient.getSurname()+" will not be saved to the BDD");
+                        conn.rollback(queue.remove());
+                        bool = false;
+                    }
+                    //if not failed the previous if statement then ...
+                    if(count > 0 && bool) {
+                        //make a save after each successful executeUpdate
+                        queue.add(conn.setSavepoint());
+                        System.out.println("save point success");
+                    }
+                }catch(SQLException e) {
+                    System.out.println("! Error !"+e.getErrorCode());
+                    //array{save1, save2} => array{save1, X} => array{X, X} (x mean delete)
+                    conn.rollback(queue.remove());
+                }
+            }
+            System.out.println("MyClient list size: "+clientList.size());
+            //queueArray {before statement, first client, second client, third client}
+            //in the end: {before statement, first client, second client, X} (x mean delete)
+            System.out.println("Queue size (savepoint) "+queue.size());
+            //release the transaction and start a new one
+            conn.commit();
+            //[...]
+            conn.close();
+
+            //FINAL RESULT
+            /*
+                Super Louis
+                save point success
+                Not Super Still Louis
+                save point success
+
+                Error, name and surname are empties (rollback)
+                  will not be saved to the BDD
+                MyClient list size: 3
+                Queue size (savepoint) 2
+             */
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+```
 
