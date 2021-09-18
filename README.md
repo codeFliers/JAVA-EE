@@ -1614,9 +1614,10 @@ With SQL, a transaction happen when you ask or do something to a database. When 
 For example, if your process have to do 5 things to be successfull but that last one failed, then you may want to come back to the 4th or even cancel everything you did from the first one to the last action.
 
 Different types of transaction mod exist:  
--dirty read (you are interacting with db data that have not been yet validated by an other transaction (commit))  
--not reproductible read (first transaction read a line followed up by an other transaction reading the same line. The first update the value as the second one is doing the same)  
--ghost read (first transaction recover a resultset from x sql request just before an other transaction update data concerning the same x. If the first transaction sql happen again, it will more data)  
+-*dirty rea* (TRANSACTION_READ_UNCOMITTED) (you are interacting with db data that have not been yet validated by an other transaction (commit))  
+-*not reproductibl*e read (TRANSACTION_READ_COMITTED) (first transaction read a line followed up by an other transaction reading the same line. The first update the value as the second one is doing the same)  
+-*ghost read*   (TRANSACTION_REPEATABLE_READ) (first transaction recover a resultset from x sql request just before an other transaction update data concerning the same x. If the first transaction sql happen again, it will more data)  
+
 *Example of a simple transaction*:  
 ```  
 @WebServlet(name = "TransactionServlet", value = "/TransactionServlet")
