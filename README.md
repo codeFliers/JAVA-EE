@@ -1715,3 +1715,55 @@ public class TransactionServlet extends HttpServlet {
     }
 ```
 
+**JPA SPECIFICATION**
+
+The JPA API is a specification and ORM like Hibernate follow it and are the actual implementation.
+It has multiple functionnalities like:  
+-automate the mapping of the relational data and variables members (object associated variables).  
+-automate part of the sql code.  
+-bring standardization / good practice to the java-database relationship.  
+
+*Entities* or *Persistent classes* are presented as java objects which represent data from the database.
+Exactly like *beans*, it has to follow the same rules:  
+-Being public / protected (not final !)  
+-Implementing the Interface "Serializable"  
+-Having a default constructor (mandatory declared if other constructors exist)  
+-Having a 'couple' of "getter / setter" for every variables members of the class. These methods must respect the typography: set / get + NameOfTheVariable()  
+
+Entities classes need to be identifiable, this principle is called *persistency idendity* of an entity.  
+In the database, this is characterized by the *primary key* of a table.  
+
+How to declare an entity (@Entity annotation) and have avalide entity class:    
+``` 
+@Entity
+public class Client implements Serializable {
+     private String name;
+
+     public Client() {
+          //
+     }
+
+     protected setName(String name) {
+          this.name = name;
+     } 
+     protected getName() {
+          return this.name;
+     }
+}
+```  
+An *Entities Manager* implement the interface "*EntityManager*". It establish a link between java classes and the database data.  
+For each databases, it handle what we call a "*persistency context*" that contains every entities from a program.  A persistency context must have a unique "*persistency identities*".  
+Exactly like in a database, you can't have 2 objects with the same persisency identities aka "same ID".  
+It is characterized by a "*persistency unit*" (parameters within *persistence.xml*).  
+His role is to manage the different entities within these contexts.  It can :  
+-create or delete entities    
+-Look at an entity by his ID or by more sophisticated ways.  
+
+There are different types of entities:  
+- *transient entity* (it doesn't exist yet in the database, isn't in a persistency context yet and doesn't have a persistency identity yet).  
+- *managed entity* (complet opposite of the previous entity described).  
+- *detached entity* (like the privious entity described except the persistency context is close).  
+- *deleted entity* (doesn't exist in a *persistency context* and have not yet been deleted from the database).    
+
+*Transaction* are managed by the JTA (*Java Transaction API*). Tomcat doesn't implement it but it can be use manually by an object that implement the interface "*EntityTransaction*".  
+ 
