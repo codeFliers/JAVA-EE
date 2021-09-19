@@ -1762,7 +1762,7 @@ His role is to manage the different entities within these contexts.  It can :
 There are different types of entities:  
 - *transient entity* (it doesn't exist yet in the database, isn't in a persistency context yet and doesn't have a persistency identity yet).  
 - *managed entity* (complet opposite of the previous entity described).  
-- *detached entity* (like the privious entity described except the persistency context is close).  
+- *detached entity* (like the previous entity described except the persistency context is close).  
 - *deleted entity* (doesn't exist in a *persistency context* and have not yet been deleted from the database).    
 
 *Transaction* are managed by the JTA (*Java Transaction API*). Tomcat doesn't implement it but it can be use manually by an object that implement the interface "*EntityTransaction*".  
