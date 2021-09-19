@@ -1221,7 +1221,7 @@ Example:
 A "Bean" is a java object respecting 4 rules:  
 -Being public  
 -Implementing the Interface "Serializable"  
--Having a default constructor (mandatory declared if other constructors exist)
+-Having a default constructor (mandatory declared if other constructors exist)  
 -Having a 'couple' of "getter / setter" for every variables members of the class.
 These methods must respect the typography: set / get + NameOfTheVariable  
 
