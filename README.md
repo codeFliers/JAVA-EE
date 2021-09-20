@@ -1819,7 +1819,43 @@ Hibernate:
 To create only one EntityManagerFactory, we can create a listener that will listen to http requests.  
 We use a JPAUtil class for convenient purpose to not rewrite "ApplicationListener.getEmf().createEntityManager()" each time.  
  
- 
+**Setup of the classes mapping**  
+Hibernate can partially automate the conversion of our classes to tables into the database of our choice and determined by the property "hibernate.hbm2dd1.auto=' ' " from prestitence.xml.
+
+To be elligible:  
+-@Entity annotation  
+-being declared in persistence.xml  
+-Correct synthax with getters/setters  
+
+In the next example, we have what is called "Single Entity with @SecondaryTable".  
+Meaning that we have enough data in one classes to make 2 tables.  
+We will create a 1 to 1 relation between the 2 classes "Client" and "Preferences".  
+![image](https://user-images.githubusercontent.com/58827656/134035898-d440c436-8590-492e-a2d2-b396ab6f096e.png)  
+
+How does our classes look like in SQL:   
+![image](https://user-images.githubusercontent.com/58827656/134035932-02a2f030-2187-4584-ac03-e5acdf011d68.png)  
+
+In this example, we renamed the class to "Clients" by using "*@Table(name="clients")*".  
+We declared the name and to which classes the variables were aimed to.  
+The "*SecondaryTable*" annotation means that we have a 1To1 relation.  
+*Name* is the secondary table name. pkJoinColumns contains the primary key (s) of the secondary table.  The "*PrimaryKeyJoinColumn *" is our 1to1 and foreignkey, the name of this FK relation.  
+```
+//CLient is an entity
+@Entity
+//Rename the entity to clients with an 's'
+@Table(name="clients")
+//add a 'preferences' table
+@SecondaryTable(name="preferences",
+        //1 to 1 relationship between 'identifiant' FROM Client and
+        //identifiant_client FROM Preferences
+        pkJoinColumns=@PrimaryKeyJoinColumn(name="identifiant_client"),
+        //name of the constraint
+        foreignKey=@ForeignKey(name="fk_preferences_clients")
+)
+```
+
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/JPA%20persistence%20example%201">Example here</a> 
+
 
 
 
