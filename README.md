@@ -1738,7 +1738,8 @@ How to declare an entity (@Entity annotation) and have avalide entity class:
 @Entity
 public class Client implements Serializable {
      private String name;
-
+     private Long id;
+     
      public Client() {
           //
      }
@@ -1749,6 +1750,9 @@ public class Client implements Serializable {
      protected getName() {
           return this.name;
      }
+    public void setId(Long id) { this.id = id; }
+    @Id
+    public Long getId() { return id; }
 }
 ```  
 An *Entities Manager* implement the interface "*EntityManager*". It establish a link between java classes and the database data.  
