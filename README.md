@@ -1769,5 +1769,43 @@ There are different types of entities:
 - *detached entity* (like the previous entity described except the persistency context is close).  
 - *deleted entity* (doesn't exist in a *persistency context* and have not yet been deleted from the database).    
 
-*Transaction* are managed by the JTA (*Java Transaction API*). Tomcat doesn't implement it but it can be use manually by an object that implement the interface "*EntityTransaction*".  
+*Transaction* are managed by the JTA (*Java Transaction API*). Tomcat doesn't implement it but it can be use manually by an object that implement the interface "*EntityTransaction*".
+
+*Example of the persistence.xml*:  
+```
+    <!-- name of the persistence unit -->
+    <persistence-unit name="PU_JPA">
+        <!-- Declare entity classes -->
+        <class>com.example.jpaProject.Client</class>
+        <!-- <class>...</class> -->
+
+        <!-- additional standards proprieties information (ie database connection) -->
+        <!-- have to add the obdj14.jar to the library -->
+        <properties>
+            <property name="javax.persistence.jdbc.driver" value="oracle.jdbc.OracleDriver" />
+            <property name="javax.persistence.jdbc.url" value="jdbc:oracle:thin:@localhost:1521:xe" />
+            <property name="javax.persistence.jdbc.user" value="test" />
+            <property name="javax.persistence.jdbc.password" value="test" />
+
+            <!-- log of the SQL Request -->
+            <property name="hibernate.show_sql" value="true"/>
+            <!-- improve the previous functionality -->
+            <property name="hibernate.format_sql" value="true"/>
+            <!-- destroy and re-create the database from the entities (classes/tables) when the app start -->
+            <property name="hibernate.hbm2ddl.auto" value="create"/>
+        </properties>
+    </persistence-unit>
+```
+
+*Connection* is replaced by an *EntityManager* object that came from *EntityManagerFactory* lnked to a specific unit.  
+![image](https://user-images.githubusercontent.com/58827656/133973785-4efe60c8-801f-444f-bb40-cead6a613284.png)  
+
+ => <a href="https://github.com/codeFliers/JAVA-EE/tree/main/JPA%20Connection%201">check here</a>  
+To create only one EntityManagerFactory, we can create a listener that will listen to http requests.  
+We use a JPAUtil class for convenient purpose to not rewrite "ApplicationListener.getEmf().createEntityManager()" each time.  
  
+ 
+
+
+
+
