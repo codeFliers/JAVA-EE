@@ -1796,7 +1796,22 @@ There are different types of entities:
         </properties>
     </persistence-unit>
 ```
-
+What create and other proprieties logs:  
+```
+Hibernate: 
+    
+    drop table Client cascade constraints
+Hibernate: 
+    
+    create table Client (
+       id number(19,0) not null,
+        email varchar2(255 char),
+        name varchar2(255 char),
+        surname varchar2(255 char),
+        primary key (id)
+    )
+    //[...]
+```
 *Connection* is replaced by an *EntityManager* object that came from *EntityManagerFactory* lnked to a specific unit.  
 ![image](https://user-images.githubusercontent.com/58827656/133973785-4efe60c8-801f-444f-bb40-cead6a613284.png)  
 
