@@ -1857,6 +1857,26 @@ The "*SecondaryTable*" annotation means that we have a 1To1 relation.
 <a href="https://github.com/codeFliers/JAVA-EE/tree/main/JPA%20persistence%20example%201">Example here</a> 
 
 
+**JPA inheritance strategy**  
+With JPA, we can use different stategies to translate inheritance in different ways.
+Examples:  
+
+-JOINED-   
+-each classes have their own tables  
+-subclasses do not contains variables from the root class  
+-Root class have a primary key that is shared with subclasses with the exception it is FK too.  
+-The root class have the **@Inheritance** annotation  and the **@DiscriminatorColumn**  
+-The subclasses does have a **@DiscriminatorValue**  and extends the root class  
+
+*How does it work ?*    
+The "DiscriminatorColumn" is a variable created by the annotation that will have the value of the "DiscriminatorValue". If we select a row in the root, emp_type will have the value of one of the discriminatorValue from the subclasses.  
+![image](https://user-images.githubusercontent.com/58827656/134137039-8df4c51b-176d-4be8-8cae-336e80137585.png)  
+
+<a href="https://www.logicbig.com/tutorials/java-ee-tutorial/jpa/joined-table-inheritance.html">Example here</a>
+
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/JPA%20inheritance%20example%201">Example here</a>
+
+
 
 
 
