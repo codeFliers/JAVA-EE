@@ -7,10 +7,6 @@
 
     <persistence-unit name="PU_JPA">
         <!-- Declare entity classes -->
-        <!--
-        <class>com.example.jpaProject.Client</class>
-        <class>com.example.jpaProject.Meal</class>
-        -->
         <class>com.example.jpaProject.Employee</class>
         <class>com.example.jpaProject.FullTimeEmployee</class>
         <class>com.example.jpaProject.PartTimeEmployee</class>
