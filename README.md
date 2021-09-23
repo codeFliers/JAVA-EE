@@ -1895,6 +1895,8 @@ In this context, we have 1.1+1.1 => oneToOne relation.  Both could have the PK/F
 
 One down side, the *town_id* can be **null** when the Person is not a Mayor. If he isn't anymore, he will have to be removed too.  
 <a href=http://blog.paumard.org/cours/jpa/chap05-heritage-single-table.html>Source here</a>  
+<a href=https://github.com/codeFliers/JAVA-EE/tree/main/SINGE_TABLE%20example%201>Source Code here</a>  
+
 
 
 
