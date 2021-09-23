@@ -1920,8 +1920,8 @@ private String surname;
 Next, we have to create the "*ClientPK*" class. It have to follow these rules:  
 -the two @id variable have to be here with the same types as in the original class  
 -the class must be Serializable  
--Getters / Setters for every variables from the main class
--Default constructor  
+-Getters / Setters for every variables from the main class  
+-Default constructor   
 -@Override hashcode and equals methods  
 
 ```
