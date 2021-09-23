@@ -1873,7 +1873,6 @@ The "DiscriminatorColumn" is a variable created by the annotation that will have
 ![image](https://user-images.githubusercontent.com/58827656/134137039-8df4c51b-176d-4be8-8cae-336e80137585.png)  
 
 <a href="https://www.logicbig.com/tutorials/java-ee-tutorial/jpa/joined-table-inheritance.html">Example here</a>
-
 <a href="https://github.com/codeFliers/JAVA-EE/tree/main/JPA%20inheritance%20example%201">Example here</a>
 
 *--SINGLE_TABLE--* 
@@ -1897,6 +1896,86 @@ One down side, the *town_id* can be **null** when the Person is not a Mayor. If 
 <a href=http://blog.paumard.org/cours/jpa/chap05-heritage-single-table.html>Source here</a>  
 <a href=https://github.com/codeFliers/JAVA-EE/tree/main/SINGE_TABLE%20example%201>Source Code here</a>  
 
+*--TABLE_PER_CLASS--*  
+We will not talk about it.  
 
+**Composite PK**  
 
+Composite means that the primary key is not unique and multiple PK are needed to assure the job.  
+Let's replace the id from Client by using as a composite key both name and surname.
+In order to do this:  
+-JPA will create a "*technical class*" : *@idClass(ClientPK.class)* 
+```
+@Entity  
+@Table(name="clients")  
+@idClass(ClientPK.class)  
+```  
+Then Client class will have to declare both name and surname variable with the annotation @id:  
+```
+@Id  
+private String name;
+@Id  
+private String surname;
+```  
+Next, we have to create the "*ClientPK*" class. It have to follow these rules:  
+-the two @id variable have to be here with the same types as in the original class  
+-the class must be Serializable  
+-Getters / Setters for every variables from the main class
+-Default constructor  
+-@Override hashcode and equals methods  
 
+```
+import java.io.Serializable;
+
+public class ClientPK implements Serializable {
+    private String name;
+    private String surname;
+
+    public ClientPK() {
+        //
+    }
+
+    public ClientPK(String name, String surname) {
+        this.name = name;
+        this.surname = surname;
+    }
+
+    //GETTERS && SETTERS =>
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getName() {
+        return this.name;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+    public String getSurname() {
+        return this.surname;
+    }
+
+    //<=
+    @Override
+    public int hashCode() {
+        return this.name.hashCode() + this.surname.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o != null && o instanceof ClientPK){
+            ClientPK clientPK = (ClientPK) o;
+
+            if (this.getName().equals(clientPK.getName())) {
+                if(this.getSurname().equals(clientPK.getSurname())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}
+```  
+As a result, in SQL we should have : *primary key (name, surname)*.  
+
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/Composite%20key%20example%201">Code example here</a>  
