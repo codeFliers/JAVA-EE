@@ -1979,3 +1979,102 @@ public class ClientPK implements Serializable {
 As a result, in SQL we should have : *primary key (name, surname)*.  
 
 <a href="https://github.com/codeFliers/JAVA-EE/tree/main/Composite%20key%20example%201">Code example here</a>  
+
+A composite key can be composed of objects. Lets see this UML example :   
+A **Client** can have 1 or more **Ticket**  (1.*)    
+A **Ticket** designate only 1 **Client**  (1.1)    
+
+A **Sport** can be accessed by 1 or more **Ticket** (1.*)    
+A **Ticket** designate only 1 **Sport** at a time (1.1)    
+ 
+We have to create a Ticket class like we did in our previous Client example with other parameters : 
+```
+@Entity
+@Table(name="TICKETS")
+@IdClass(TicketPK.class)
+public class Ticket implements Serializable {
+    @Id
+    @ManyToOne
+    @JoinColumn(name="identifiant_client",
+            foreignKey=@ForeignKey(name="FK_TICKETS_CLIENTS"))
+    private Client client;
+    @Id
+    @ManyToOne
+    @JoinColumn(name="identifiant_sport",
+            foreignKey=@ForeignKey(name="FK_TICKETS_SPORTS"))
+    //@Column(name="sport", table="TICKETS", nullable = false)
+    private Sport sport;
+    //[…]
+}
+```
+
+Then, we have to create the **TicketPK** technical class. Our objects will have an "int" type :  
+```
+import java.io.Serializable;
+public class TicketPK implements Serializable {
+    private int client;
+    private int sport;
+
+    public TicketPK() {
+        //
+    }
+
+    public void setClient(int client) {
+        this.client = client;
+    }
+    public int getClient() {
+        return this.client;
+    }
+
+    public void setSport(int sport) {
+        this.sport = sport;
+    }
+    public int getSport() {
+        return this.sport;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getClient() + this.getSport();
+    }
+    @Override
+    public boolean equals(Object o) {
+        boolean boolRes = false;
+        if (o != null && o instanceof TicketPK) {
+            TicketPK ticketPK = (TicketPK) o;
+            boolRes = ( ticketPK.getClient() == this.getClient() && ticketPK.getSport() == this.getSport() );
+        }
+        return boolRes;
+    }
+}
+```  
+As a result, we have :  
+```
+Hibernate: 
+    alter table TICKETS 
+       add constraint FK_TICKETS_CLIENTS 
+       foreign key (identifiant_client) 
+       references clients
+Hibernate: 
+    alter table TICKETS 
+       add constraint FK_TICKETS_SPORTS 
+       foreign key (identifiant_sport) 
+       references Sport
+```
+
+In our database, we have : 
+```
+CREATE TABLE  "TICKETS" 
+   (	"IDENTIFIANT_CLIENT" NUMBER(10,0) NOT NULL ENABLE, 
+	"IDENTIFIANT_SPORT" NUMBER(10,0) NOT NULL ENABLE, 
+	 PRIMARY KEY ("IDENTIFIANT_CLIENT", "IDENTIFIANT_SPORT") ENABLE, 
+	 CONSTRAINT "FK_TICKETS_CLIENTS" FOREIGN KEY ("IDENTIFIANT_CLIENT")
+	  REFERENCES  "CLIENTS" ("IDENTIFIANT") ENABLE, 
+	 CONSTRAINT "FK_TICKETS_SPORTS" FOREIGN KEY ("IDENTIFIANT_SPORT")
+	  REFERENCES  "SPORT" ("IDENTIFIANT") ENABLE
+   )
+/
+```  
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/Composite%20key%20on%20object%20example%201">Code here</a>  
+
+NEXT ...  
