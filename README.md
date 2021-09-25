@@ -2077,4 +2077,55 @@ CREATE TABLE  "TICKETS"
 ```  
 <a href="https://github.com/codeFliers/JAVA-EE/tree/main/Composite%20key%20on%20object%20example%201">Code here</a>  
 
-NEXT ...  
+**Composite key using @EmbeddedId, @Embedable and @MapsId**  
+In Tickets:  
+-We replace *@Id* that designated our composite key by *@MapsId* (same name as in carnetPKEmbedded and different from Tickets class).  
+-We delete *@IdClass* and replace it in the class with @EmbeddedId on top of an object *private CarnetPKEmbedded carnetPKEmbedded*.  
+-We instanciate the previous object in the default constructor.  
+-We add a public getter and a private setter for the *carnetPKEmbedded* object.  
+Then, we create *CarnetPKEmbedded*, with the annotation *@Embeddable* and the *Serializable* implementation, that will contains getters/setters, hashCode and equals overrides.  
+
+Our technical class is linked to his class by an object. We designate the composite key by using the *@MapsId*. The object class look like the same as the previous example with an annotation *@Embeddable*.  
+
+```
+@Entity
+@Table(name="TICKETS") //<=
+public class Ticket implements Serializable {
+    @EmbeddedId //<=
+    private TicketPKEmbedded ticketPKEmbedded;
+
+    @MapsId("idClient") //<=
+    @ManyToOne
+    @JoinColumn(name="identifiant_client",
+            foreignKey=@ForeignKey(name="FK_TICKETS_CLIENTS"))
+    private Client client;
+
+    @MapsId("idSport") //<=
+    @ManyToOne
+    @JoinColumn(name="identifiant_sport",
+            foreignKey=@ForeignKey(name="FK_TICKETS_SPORTS"))
+    //@Column(name="sport", table="TICKETS", nullable = false)
+    private Sport sport;
+    //[...]
+    public TicketPKEmbedded getTicketPKEmbedded() { //<=
+        return this.ticketPKEmbedded;
+    }
+
+    public Ticket() { //<=
+        this.ticketPKEmbedded = new TicketPKEmbedded();
+    }
+```
+
+```
+@Embeddable //<=
+public class TicketPKEmbedded implements Serializable {
+    private int idClient;
+    private int idSport;
+    //getters, setters, default constructor, hashCode and equals override
+```
+
+
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/Composite%20key%20with%20object%20and%20EmbededId%2C%20MapsId%2C%20Embeddable%20example%201">Example code here</a>  
+
+
+
