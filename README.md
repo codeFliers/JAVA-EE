@@ -2241,6 +2241,6 @@ public class Client implements Serializable {
     private Address address;
 ```
 
-<a href="https://github.com/codeFliers/JAVA-EE/tree/main/1to1%20-%202%20classes%202%20%40OneToOne%20mappedBy"></a>   
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/1to1%20-%202%20classes%202%20%40OneToOne%20mappedBy">Code example here</a>   
 
 
