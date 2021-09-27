@@ -2195,7 +2195,7 @@ What we need :
 Still there is a slave/master in this relationship to make it work like a "mirror".  
 -Address (Slave) will have the parameter *@mappedBy(name="address")* (name of the variable in address) in the *@OneToOne* annotation.  
 
-Address in Client will be an PK/FK in the database.
+Address in Client will be a PK/FK in the database.
 
 As a result : 
 ```
