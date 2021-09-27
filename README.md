@@ -2122,10 +2122,125 @@ public class TicketPKEmbedded implements Serializable {
     private int idClient;
     private int idSport;
     //getters, setters, default constructor, hashCode and equals override
-```
-
-
+```  
 <a href="https://github.com/codeFliers/JAVA-EE/tree/main/Composite%20key%20with%20object%20and%20EmbededId%2C%20MapsId%2C%20Embeddable%20example%201">Example code here</a>  
 
+**1:1 UNIDIRECTIONAL relationship**  
+![image](https://user-images.githubusercontent.com/58827656/134878361-0dc29981-35e8-4d58-9b6e-b421e7f17799.png)  
+
+*First solution*: Only one class, CLIENT with Address Attributes.  
+
+What we need :  
+-Both implement Serializable  and the setters/getters/default constructors …
+-Client is an @Entity and does have a PK (@Id)  
+-Address have @Embeddable (intégrable)  
+-Client does have an @Embedded Address object (intégrer)  
+
+As a result:  
+```
+create table clients (
+       identifiant number(19,0) not null,
+        codePostal number(10,0) not null,
+        rue varchar2(255 char) not null,
+        ville varchar2(255 char) not null,
+        email varchar2(45 char) not null,
+        name varchar2(45 char) not null,
+        password varchar2(100 char) not null,
+        surname varchar2(45 char) not null,
+        primary key (identifiant)
+    )
+```
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/1to1%20only%201%20class%20Embeddable%20Embedded">Code here</a>  
+
+*Second solution*: Two classes with Client having an object Address under the @OneToOne annotation. Remember, it is unidirectional so only one class does have a FK at a time.   
+
+What we need :  
+-Address does have an *@Id* and is and *@Entity*  
+-Client does need an Address object under the annotation *@OneToOne*  
+*Note: The @JoinColumn + foreignKey is usefull to  put a name on the constraint but is not mandatory.*  
+
+As a result: 
+```
+    create table addresses (
+       identifiant number(10,0) not null,
+        codePostal number(10,0) not null,
+        rue varchar2(255 char) not null,
+        ville varchar2(255 char) not null,
+        primary key (identifiant)
+    ) 
+    create table clients (
+       identifiant number(19,0) not null,
+        email varchar2(45 char) not null,
+        name varchar2(45 char) not null,
+        password varchar2(100 char) not null,
+        surname varchar2(45 char) not null,
+        address number(10,0),
+        primary key (identifiant)
+    )
+    alter table clients 
+       add constraint fk_clients_addresses 
+       foreign key (address) 
+       references addresses
+```
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/1to1%20-%202%20classes%20%40OneToOne">Code here</a>  
+
+
+**1:1 BIDIRECTIONAL relationship** 
+
+Both classes will have an object from the relationship counter part.  
+What we need :  
+-@OneToOne relationship on both parties  
+-@Entity, @Table, @Id, Serializable, constructor, getter/setter on both parties.  
+
+Still there is a slave/master in this relationship to make it work like a "mirror".  
+-Address (Slave) will have the parameter *@mappedBy(name="address")* (name of the variable in address) in the *@OneToOne* annotation.  
+
+Address in Client will be an PK/FK in the database.
+
+As a result : 
+```
+CREATE TABLE  "CLIENTS" 
+   (	"IDENTIFIANT" NUMBER(19,0) NOT NULL ENABLE, 
+	"EMAIL" VARCHAR2(45 CHAR) NOT NULL ENABLE, 
+	"NAME" VARCHAR2(45 CHAR) NOT NULL ENABLE, 
+	"PASSWORD" VARCHAR2(100 CHAR) NOT NULL ENABLE, 
+	"SURNAME" VARCHAR2(45 CHAR) NOT NULL ENABLE, 
+	"ADDRESS" NUMBER(10,0), 
+	 PRIMARY KEY ("IDENTIFIANT") ENABLE, 
+	 CONSTRAINT "FK_CLIENTS_ADDRESSES" FOREIGN KEY ("ADDRESS")
+	  REFERENCES  "ADDRESSES" ("IDENTIFIANT") ENABLE
+   )
+CREATE TABLE  "ADDRESSES"
+   (           "IDENTIFIANT" NUMBER(10,0) NOT NULL ENABLE,
+               "CODEPOSTAL" NUMBER(10,0) NOT NULL ENABLE,
+               "RUE" VARCHAR2(255 CHAR) NOT NULL ENABLE,
+               "VILLE" VARCHAR2(255 CHAR) NOT NULL ENABLE,
+                PRIMARY KEY ("IDENTIFIANT") ENABLE
+
+   )
+```
+In JAVA, we have a bidirectionnal code but it doesn't translate in SQL.
+```
+public class Address implements Serializable {
+    @Id
+    private int identifiant;
+    
+    //name of the variable on the client.java side
+    @OneToOne(mappedBy = "address")
+    private Client client;
+```
+```
+public class Client implements Serializable {
+    @Column(name="identifiant", table="clients")
+    @Id
+    private Long identifiant;
+    
+    @OneToOne
+    @JoinColumn(name="address",
+    foreignKey = @ForeignKey(name="fk_clients_addresses"))
+    private Address address;
+```
+
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/1to1%20-%202%20classes%202%20%40OneToOne%20mappedBy"></a>  
 
 
