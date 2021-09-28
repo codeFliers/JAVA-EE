@@ -2361,4 +2361,59 @@ SQL code:
 <a href="https://github.com/codeFliers/JAVA-EE/tree/main/MtoN%20bidirectional%20example%201">code here</a>  
 <a href="http://blog.paumard.org/cours/jpa/chap03-entite-relation.html">an other example here</a>	
 
+**SIMPLE TRANSACTION**  
+In this simple example, we will see : register, modify and delete information.  
+We start by creating a persistence context:  
+```
+//return ApplicationListener.getEmf().createEntityManager();
+//public static EntityManagerFactory getEmf()  {return ApplicationListener.emf;}
+EntityManager em = JPAUtil.getEntityManager();
+```  
+If the connection is open we continue:  
+```
+if(em.isOpen()) {...
+```  
+We start a transaction by using :  
+```
+em.getTransaction().begin();
+```  
+And finish it with a commit() :  
+```
+em.getTransaction().commit();
+```  
+
+If we want to add the object to the database :  
+```
+em.persist(object);
+```  
+If we want to update an entity in the database :  
+```  
+client = em.find(Client.class, (long) 2);
+if(client != null) {
+	out.println("Client found");
+	//start
+	em.getTransaction().begin();
+	//modify object
+	client.setPassword("no");
+	//commit the modification to the database
+	em.getTransaction().commit();
+	out.println("Client modified");
+}
+```  
+If we want to remove an entity in the database :  
+```
+//start
+em.getTransaction().begin();
+//modify object
+em.remove(client);
+//commit the modification to the database
+em.getTransaction().commit();
+```  
+If we want to avort a commit() that turned bad : 
+```
+if(em.getTransaction().isActive()) {
+em.getTransaction().rollback();
+}
+```  
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/Transaction%20simple%20example%201">code here</a>
 
