@@ -2251,7 +2251,7 @@ How to read it ?
 -Many *MESSAGES* (slaves) to One *CLIENT* (master)  
 
 @OneToMany example : 
-The master will a **Collection** of *MESSAGES* objects.  
+The MASTER will a **Collection** of *MESSAGES* objects.  
 ![image](https://user-images.githubusercontent.com/58827656/135043655-cff84481-7207-488c-a9bc-10d1c231ecf0.png)
 
 Client code :  
@@ -2277,6 +2277,21 @@ SQL code :
        references clients
 ```
 <a href="https://github.com/codeFliers/JAVA-EE/tree/main/1toN%20unidirectional%20%40OneToMany%20example%201">Code here</a>  
+<a href="http://blog.paumard.org/cours/jpa/chap03-entite-relation.html">An other example here</a>  
+
+@ManyToOne example :  
+The SLAVE will have a MASTER object under the @ManyToOne annotation that will be a FK in the database.  
+![image](https://user-images.githubusercontent.com/58827656/135049901-83b6a81e-1876-4f0d-8321-9fee7874d162.png)
+
+Client code :  
+```
+@ManyToOne(name="identifiant_client", 
+foreignKey=@ForeignKey(name="fk_messages_clients"))
+private Client client;
+```
+SQL code is the same as in the @OneToMany example.  
+
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/1toN%20unidirectional%20%40ManyToOne%20example%201">Code here</a>  
 <a href="http://blog.paumard.org/cours/jpa/chap03-entite-relation.html">An other example here</a>  
 
 
