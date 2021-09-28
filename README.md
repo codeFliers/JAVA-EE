@@ -2303,3 +2303,62 @@ When we have *bidirectional*, we use *@mappedBy* to translate it.
 <a href="https://github.com/codeFliers/JAVA-EE/tree/main/1toN%20bidirectional%20%40ManyToOne%20%40OneToMany%20example%201">Code example here</a>  
 <a href="http://blog.paumard.org/cours/jpa/chap03-entite-relation.html">An other example here</a>  
 
+**N:M Relationship**  
+
+In the relational model, the association between two or more entities is transformed in it own table, we call it *"insertion table"*.  
+The goal of this table is to link multiple table between each other (ie: client / product / shopping list).  
+![image](https://user-images.githubusercontent.com/58827656/135061129-7c19d9b2-a390-40cf-9fda-ba6056f2f94e.png)  
+
+*SPORTS* can be played on compatible *FIELDS*  
+*FIELDS* allows *SPORTS* to be played on them
+
+*Bidirectional n:m* :  
+
+How do we manage it ?  
+We have to identify the master from the slave in this relation. The sport can only play on a field if it is allowed, so sport is the slave of a field which is the master.  
+Because it is a bidirectional context, the slave will have the *@mappedBy* parameter on the @ManyToMany annotation.  
+
+Now, we have to create translate this insertion table : 
+```
+public class Field {
+//...
+@ManyToMany
+@JoinTable(
+name="fields_sports"
+joinColumns=@JoinColumn(name="identifiant_field",
+foreignKey=@ForeignKey(name="fk_fields"), nullable = false),
+inverseJoinColumns=@JoinColumn(name="identifiant_sport",
+foreignKey=@ForeignKey(name="fk_sports"), nullable = false))
+private List<Sport> sportsAllowed;
+```
+*Join table* => create the insertion table then with "joinColumns+inverseJoinColumns", we complet it.  
+
+SQL code: 
+```
+    create table fields_sports (
+       identifiant_field number(19,0) not null,
+        identifiant_sport number(19,0) not null
+    )
+    
+    create table sports (
+       idendifiant number(19,0) not null,
+        name varchar2(255 char),
+        number_Players number(10,0) not null,
+        primary key (idendifiant)
+    )
+    
+    alter table fields_sports 
+       add constraint fk_sports 
+       foreign key (identifiant_sport) 
+       references sports
+       
+    alter table fields_sports 
+       add constraint fk_fields 
+       foreign key (identifiant_field) 
+       references fields
+    }
+```
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/MtoN%20bidirectional%20example%201">code here</a>  
+<a href="http://blog.paumard.org/cours/jpa/chap03-entite-relation.html">an other example here</a>	
+
+
