@@ -2331,7 +2331,7 @@ inverseJoinColumns=@JoinColumn(name="identifiant_sport",
 foreignKey=@ForeignKey(name="fk_sports"), nullable = false))
 private List<Sport> sportsAllowed;
 ```
-*Join table* => create the insertion table then with "joinColumns+inverseJoinColumns", we complet it.  
+*Join table* => create the insertion table then with "joinColumns (fk master) +inverseJoinColumns (fk slave)", we complet it.  
 
 SQL code: 
 ```
