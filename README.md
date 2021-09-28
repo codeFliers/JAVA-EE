@@ -2295,4 +2295,11 @@ SQL code is the same as in the @OneToMany example.
 <a href="http://blog.paumard.org/cours/jpa/chap03-entite-relation.html">An other example here</a>  
 
 
+**1:N BIDIRECTIONAL relationship**  
+It look a lot like the unidirectional code. It is a conjonction of *@OneToMany* and *@ManyToMany* with the parameter *@mappedBy* on the *@OneToMany* annotation.  
+When we have *bidirectional*, we use *@mappedBy* to translate it.  
+![image](https://user-images.githubusercontent.com/58827656/135053581-9b694887-680e-45d7-bebd-3ef0f3e205e1.png)
+
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/1toN%20bidirectional%20%40ManyToOne%20%40OneToMany%20example%201">Code example here</a>  
+<a href="http://blog.paumard.org/cours/jpa/chap03-entite-relation.html">An other example here</a>  
 
