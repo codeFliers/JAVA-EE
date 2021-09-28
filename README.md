@@ -2243,4 +2243,41 @@ public class Client implements Serializable {
 
 <a href="https://github.com/codeFliers/JAVA-EE/tree/main/1to1%20-%202%20classes%202%20%40OneToOne%20mappedBy">Code example here</a>   
 
+**1:N UNIDIRECTIONAL relationship**  
+In this, we will be using either *@OneToMany* or *@ManyToOne*.  
+
+How to read it ?  
+-One *CLIENT* (master) to Many *MESSAGES* (slaves)  
+-Many *MESSAGES* (slaves) to One *CLIENT* (master)  
+
+@OneToMany example : 
+The master will a **Collection** of *MESSAGES* objects.  
+![image](https://user-images.githubusercontent.com/58827656/135043655-cff84481-7207-488c-a9bc-10d1c231ecf0.png)
+
+Client code :  
+```
+@OneToMany(name="identifiant_client", 
+foreignKey=@ForeignKey(name="fk_messages_clients"))
+private List<Messages> messages;
+```
+"identifiant_client" will be a FK in the SQL code from Messages table.  
+
+SQL code : 
+```
+    create table messages (
+       identifiant number(19,0) not null,
+        message varchar2(255 char) not null,
+        message_date date not null,
+        identifiant_client number(19,0),
+        primary key (identifiant)
+    )
+    alter table messages 
+       add constraint fk_messages_clients 
+       foreign key (identifiant_client) 
+       references clients
+```
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/1toN%20unidirectional%20%40OneToMany%20example%201">Code here</a>  
+<a href="http://blog.paumard.org/cours/jpa/chap03-entite-relation.html">An other example here</a>  
+
+
 
