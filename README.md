@@ -2462,3 +2462,16 @@ Example:
 If a Town is persisted or removed, then mayor will automatically be too.  
 
 <a href="http://blog.paumard.org/cours/jpa/chap03-entite-relation.html">Example here 4.7</a>  
+
+**Detached entity**  
+
+Being de detached entity mean to *not being attached to a persistant context*, so without any link with a database.  
+This context is materialize by an EntityManager object and for the sake of performance, that must close itself.  
+For example, a JPS page work mostly with detached entities. Or between two http request concerning one user.  
+In these two examples, the entities can be maintened to a SESSION, meaning on the server side.  
+
+In the next example, first we simulate a first persistent context within we attached for a moment a Client object before detaching from it and saving it to a session.  
+Next, we recover it from the session into a new persistent context, modify it and use a persist() method on it.  But in order to do this, we use a copy of the original object persistent context from the merge method.  
+
+<a href=" https://github.com/codeFliers/JAVA-EE/tree/main/Detached%20entity%20example%201 ">Example code here</a>  
+
