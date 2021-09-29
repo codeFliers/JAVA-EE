@@ -2417,3 +2417,48 @@ em.getTransaction().rollback();
 ```  
 <a href="https://github.com/codeFliers/JAVA-EE/tree/main/Transaction%20simple%20example%201">code here</a>
 
+**Cascade Behavior**
+
+An EntityManager object have différents methods like **PERSIST, MERGE, REMOVE** …  
+To persist data into the database, every actors of this relation have to be persisted.  
+
+Example: 
+```
+Mayor m = new Mayor();  
+Town t = new Town();
+EntityManager em = JPAUtil.getEntityManager();
+
+em.getTransaction().begin();
+t.setMayor(m);
+em.persist(t);
+em.getTransaction().commit(); 
+```
+
+It will cause an error because while 't' persist in the persistence context, 'm' from Mayor is not.  
+While it is possible to manually make persistent every actors of this relationship : 
+```
+//[…]
+em.getTransaction().begin();
+t.setMayor(m);
+em.persist(t);
+em.persist(m);
+em.getTransaction().commit(); 
+```
+It would be better to have a "cascade effect", meaning that one action will have a snowball effect on the others with what it has a relation to.  
+
+It is a parameter on @OneToOne, @OneToMany and @ManyToMany annotations.  
+
+Example:  
+```
+@Entity
+ public  class Town  implements Serializable {
+     @Id
+     @GeneratedValue(strategy = GenerationType.AUTO)
+     private Long id;
+     @OneToOne(cascade={CascadeType.PERSIST, CascadeType.REMOVE})
+     private Mayor mayor ;
+}
+```
+If a Town is persisted or removed, then mayor will automatically be too.  
+
+<a href="http://blog.paumard.org/cours/jpa/chap03-entite-relation.html">Example here 4.7</a>  
