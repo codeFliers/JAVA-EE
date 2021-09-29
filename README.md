@@ -2473,5 +2473,5 @@ In these two examples, the entities can be maintened to a SESSION, meaning on th
 In the next example, first we simulate a first persistent context within we attached for a moment a Client object before detaching from it and saving it to a session.  
 Next, we recover it from the session into a new persistent context, modify it and use a persist() method on it.  But in order to do this, we use a copy of the original object persistent context from the merge method.  
 
-<a href=" https://github.com/codeFliers/JAVA-EE/tree/main/Detached%20entity%20example%201 ">Example code here</a>  
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/Detached%20entity%20example%201">Example code here</a>  
 
