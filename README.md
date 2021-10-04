@@ -1474,8 +1474,149 @@ And use this:
 
 We have this result instead: "Address: no address"
 
-**JSTL**
-//
+**JSTL**  
+
+Java server page Standard Tag Library (*JSTL*) is a library with tags available that can be use in JSP pages to bring more java like functionnalities.  
+To make it work :  
+``` <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%> ```  
+Examples:  
+*Passing parameters in URL*  
+```
+<li><a href="${pageContext.request.contextPath}/JspparamServlet?p1=A&p2=B&p3=C">click me</a></li>
+    <li>
+        <a href="
+        <c:url value="/JspparamServlet">
+            <c:param name="p1" value="A"/>
+            <c:param name="p2" value="B"/>
+            <c:param name="p3" value="C"/>
+        </c:url>"
+        >clickmeJSTL</a>
+    </li>
+```
+To use information from a form:  
+```
+    <form method="get" action='Views/Jspparam/jstlparam.jsp'>
+        <table>
+            <tr>
+                <td>Prénom:</td>
+                <td><input type='text' name='prenom' /></td>
+            </tr>
+            <tr>
+                <td>Nom:</td>
+                <td><input type='text' name='nom' /></td>
+            </tr>
+            <tr>
+                <td>Langages que vous connaissez:</td>
+                <td><select name='langages' size='7' multiple='true'>
+                    <option value='C'>C</option>
+                    <option value='C++'>C++</option>
+                    <option value='Objective-C'>Objective-C</option>
+                    <option value='Java'>Java</option>
+                </select></td>
+            </tr>
+        </table>
+        <p>
+            <input type='submit' value='Afficher!' />
+    </form>
+```  
+Other:  
+```
+        <!-- Secured Display -->
+        <p><c:out value="${ param.p1}"/></p>
+        <p><c:out value="${ param.p2}"/></p>
+        <p><c:out value="${ param.p3}"/></p>
+        <p><c:out value="${ requestScope.test}"/></p>
+```
+```
+        <!-- affectate value to a variable + displaying it -->
+        <c:set var="uneVariable" value="${5 * 5}" />
+        <p><c:out value="${ uneVariable }"/></p>
+```
+```
+        <!-- condition -->
+        <c:if test="${uneVariable > 20}">
+                <p>variable is superior to 20</p>
+        </c:if>
+```
+```
+<!-- switch/case -->
+<c:choose>
+	<c:when test="${uneVariable == null}">Variable null</c:when>
+	<c:when test="${uneVariable > 0}">Variable > 0</c:when>
+	<c:otherwise>Variable < 0</c:otherwise>
+</c:choose>
+```
+```
+<!-- simple array -->
+<table style="border:1px solid #333">
+	<thead style="background-color: #333;color: #fff;">
+		<th colspan="6">TABLE HEADER</th>
+	</thead>
+	<tbody>
+		<tr>
+			<c:forEach var="i" begin="0" end="5" step="1">
+				<td style="border:1px solid #333"><c:out value="${i}"/></td>
+			</c:forEach>
+		</tr>
+	</tbody>
+</table>
+```
+```
+<!-- foreach map -->
+<%
+  ArrayList list = new ArrayList<>();
+  list.add("1");list.add("2");list.add("3");
+  pageContext.setAttribute("list", list);
+%>
+<c:forEach items="${list}" var="value">
+	<p><c:out value="${value}"/></p>
+</c:forEach>
+```
+```
+<!-- hashmap -->
+<table>
+	<c:forEach var="entry" items="${headerValues}">
+		<tr>
+			<td><c:out value="${entry.key}"/></td>
+			<td><c:out value="${entry.value}"/> </td>
+		</tr>
+	</c:forEach>
+</table>
+```
+```
+        <!-- Iterating hashmap<String, ArrayList> -->
+    <table>
+    <c:forEach items="${paramValues}" var="it">
+        <tr>
+            <td><c:out value="${it.key}"/></td>
+            <c:if test="${it.key == 'langages'}">
+                <c:forEach items="${it.value}" var="value">
+                    <td><c:out value="${value}"/></td>
+                </c:forEach>
+            </c:if>
+        </tr>
+    </c:forEach>
+    </table>
+```
+
+What is a template in this context ?  It is a way to save a recurring page organization (tag, script, css import, ...) and use "placeholders" to incorporate dynamic data to it.  
+JSP give this functionality and use "fragments" (html content).  
+First, we create a template into the "/WEB-INF/tags" folder:  
+(*simple_layout*)  
+![image](https://user-images.githubusercontent.com/58827656/135811733-6628580e-0714-4c57-a420-7b33216d21b2.png)
+
+Attributes tag declare our fragment variables then jsp:invoke point the placeholders to the right place.  
+Then, we have our JSP page that will call the previous template and fill it with it's data :  
+(*mypage.jsp*)  
+![image](https://user-images.githubusercontent.com/58827656/135812051-e72267db-7ae4-445f-a9cb-cd580a68bae4.png)  
+(A placeholder is optional)   
+
+*Summary* :  
+Index.jsp send a HTTP request to "mypage.jsp"  
+mypage.jsp call the template "simple_layout" and incorporate it  
+At this moment, mypage.jsp detect the placeholders and fill them with it's informations  
+
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/JSTL%20template%20example%201">JSTL + Template example</a>  
 
 ### JDBC and JPA - data persistence ###
 
