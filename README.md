@@ -2397,9 +2397,10 @@ The MASTER will have a **Collection** of *MESSAGES* objects.
 
 Client code :  
 ```
-@OneToMany(name="identifiant_client", 
-foreignKey=@ForeignKey(name="fk_messages_clients"))
-private List<Messages> messages;
+@OneToMany
+@JoinColumn(name="identifiant_client",
+foreignKey = @ForeignKey(name="fk_messages_clients"))
+private List<Message> messages;
 ```
 "identifiant_client" will be a FK in the SQL code from Messages table.  
 
@@ -2426,8 +2427,9 @@ The SLAVE will have a MASTER object under the @ManyToOne annotation that will be
 
 Client code :  
 ```
-@ManyToOne(name="identifiant_client", 
-foreignKey=@ForeignKey(name="fk_messages_clients"))
+@ManyToOne
+@JoinColumn(name="identifiant_client",
+    foreignKey = @ForeignKey(name="fk_messages_clients"))
 private Client client;
 ```
 SQL code is the same as in the @OneToMany example.  
