@@ -2392,7 +2392,7 @@ How to read it ?
 -Many *MESSAGES* (slaves) to One *CLIENT* (master)  
 
 @OneToMany example : 
-The MASTER will a **Collection** of *MESSAGES* objects.  
+The MASTER will have a **Collection** of *MESSAGES* objects.  
 ![image](https://user-images.githubusercontent.com/58827656/135043655-cff84481-7207-488c-a9bc-10d1c231ecf0.png)
 
 Client code :  
