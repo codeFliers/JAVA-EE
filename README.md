@@ -2218,7 +2218,9 @@ CREATE TABLE  "TICKETS"
 ```  
 <a href="https://github.com/codeFliers/JAVA-EE/tree/main/Composite%20key%20on%20object%20example%201">Code here</a>  
 
-**Composite key using @EmbeddedId, @Embedable and @MapsId**  
+Note : If an @Id is auto-generated, the setter should be private.  
+
+**Composite key using @EmbeddedId, @Embeddable and @MapsId**  
 In Tickets:  
 -We replace *@Id* that designated our composite key by *@MapsId* (same name as in carnetPKEmbedded and different from Tickets class).  
 -We delete *@IdClass* and replace it in the class with @EmbeddedId on top of an object *private CarnetPKEmbedded carnetPKEmbedded*.  
@@ -2227,6 +2229,7 @@ In Tickets:
 Then, we create *CarnetPKEmbedded*, with the annotation *@Embeddable* and the *Serializable* implementation, that will contains getters/setters, hashCode and equals overrides.  
 
 Our technical class is linked to his class by an object. We designate the composite key by using the *@MapsId*. The object class look like the same as the previous example with an annotation *@Embeddable*.  
+Embeddable designate the component table (composite), MapsId the id that will be present to compose the component and EmbeddedId create a link to the technical class.   
 
 ```
 @Entity
@@ -2467,7 +2470,7 @@ public class Field {
 //...
 @ManyToMany
 @JoinTable(
-name="fields_sports"
+name="fields_sports",
 joinColumns=@JoinColumn(name="identifiant_field",
 foreignKey=@ForeignKey(name="fk_fields"), nullable = false),
 inverseJoinColumns=@JoinColumn(name="identifiant_sport",
