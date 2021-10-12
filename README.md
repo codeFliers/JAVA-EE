@@ -2275,7 +2275,7 @@ public class TicketPKEmbedded implements Serializable {
 *First solution*: Only one class, CLIENT with Address Attributes.  
 
 What we need :  
--Both implement Serializable  and the setters/getters/default constructors …
+-Both implement Serializable  and the setters/getters/default constructors …  
 -Client is an @Entity and does have a PK (@Id)  
 -Address have @Embeddable (intégrable) and not an @Entity
 -Client does have an @Embedded Address object (intégrer) to link to the Address  
@@ -2307,7 +2307,7 @@ Internaute(email, nom, prenom, adresse, codePostal, ville);
 *Second solution*: Two classes with Client having an object Address under the @OneToOne annotation. Remember, it is unidirectional so only one class does have a FK at a time.   
 
 What we need :  
--Address does have an *@Id* and is and *@Entity*  
+-Address does have an *@Id* and is an *@Entity*  
 -Client does need an Address object under the annotation *@OneToOne*  
 *Note: The @JoinColumn + foreignKey is usefull to  put a name on the constraint but is not mandatory.*  
 
