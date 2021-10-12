@@ -2515,6 +2515,10 @@ SQL code:
 <a href="https://github.com/codeFliers/JAVA-EE/tree/main/MtoN%20bidirectional%20example%201">code here</a>  
 <a href="http://blog.paumard.org/cours/jpa/chap03-entite-relation.html">an other example here</a>	
 
+**1:n RELATIONSHIP MORE EXAMPLES**  
+
+![OneToManyUniBe](https://user-images.githubusercontent.com/58827656/136944426-f8da535e-3412-4d4b-999d-28eabc0c7ff6.png)  
+
 **SIMPLE TRANSACTION**  
 In this simple example, we will see : register, modify and delete information.  
 We start by creating a persistence context:  
