@@ -2277,8 +2277,8 @@ public class TicketPKEmbedded implements Serializable {
 What we need :  
 -Both implement Serializable  and the setters/getters/default constructors …
 -Client is an @Entity and does have a PK (@Id)  
--Address have @Embeddable (intégrable)  
--Client does have an @Embedded Address object (intégrer)  
+-Address have @Embeddable (intégrable) and not an @Entity
+-Client does have an @Embedded Address object (intégrer) to link to the Address  
 
 As a result:  
 ```
@@ -2295,6 +2295,14 @@ create table clients (
     )
 ```
 <a href="https://github.com/codeFliers/JAVA-EE/tree/main/1to1%20only%201%20class%20Embeddable%20Embedded">Code here</a>  
+
+Sometime, a class doesn't need to be materialized into a database in contrary to what's in it.  
+With the use of @Embeddable that replace @Entity and @Embedded, we can retrieve the proprieties of a class, group them into an other class and so having only one entity into the database that will contains both classes properties.  
+
+The "compenent" (composante) class will have the annotation @Embeddable and the other will retrieve the other class information by an object of this class annoted by @Embedded.  
+![image](https://user-images.githubusercontent.com/58827656/136916021-df7d13f9-8046-4db0-a94a-883f11ad9088.png)  
+Internaute(email, nom, prenom, adresse, codePostal, ville);  
+<a href="https://github.com/codeFliers/JAVA-EE/tree/main/One%20class%20Embedded%20Embeddable%20exemple%202">Code example here</a>  
 
 *Second solution*: Two classes with Client having an object Address under the @OneToOne annotation. Remember, it is unidirectional so only one class does have a FK at a time.   
 
