@@ -14,7 +14,7 @@ It is divised in 3 layers: **client** (*1*), a **medium** (*2*) and **data** (*3
 Every part of it are running in "**containers**"² who are virtualised environment in which application get executed (app container), applet (applet container) and
 the handle of http request by the server (web container).
 
-Put in a very simple way, it is very usefull in Enterprise ecosystems and to get into web application development.
+Put in a very simple way, it is very usefull in Enterprise1:1 UNIDIRECTIONAL relationship ecosystems and to get into web application development.
 
 ### How is the basic logic structure of a Web Application ?
 
@@ -2277,7 +2277,7 @@ public class TicketPKEmbedded implements Serializable {
 What we need :  
 -Both implement Serializable  and the setters/getters/default constructors …  
 -Client is an @Entity and does have a PK (@Id)  
--Address have @Embeddable (intégrable) and not an @Entity
+-Address have @Embeddable (intégrable) and not an @Entity  
 -Client does have an @Embedded Address object (intégrer) to link to the Address  
 
 As a result:  
