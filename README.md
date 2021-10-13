@@ -2466,7 +2466,7 @@ The goal of this table is to link multiple table between each other (ie: client 
 *SPORTS* can be played on compatible *FIELDS*  
 *FIELDS* allows *SPORTS* to be played on them
 
-*Bidirectional n:m* :  
+**BIDIRECTIONAL n:m** :  
 
 How do we manage it ?  
 We have to identify the master from the slave in this relation. The sport can only play on a field if it is allowed, so sport is the slave of a field which is the master.  
@@ -2485,6 +2485,12 @@ inverseJoinColumns=@JoinColumn(name="identifiant_sport",
 foreignKey=@ForeignKey(name="fk_sports"), nullable = false))
 private List<Sport> sportsAllowed;
 ```
+
+```
+    @ManyToMany(mappedBy = "allowedSport")
+    private List<Field> compatibleFields;
+```
+
 *Join table* => create the insertion table then with "joinColumns (fk master) +inverseJoinColumns (fk slave)", we complet it.  
 Join table represent the association table (fields_sports). JoinColumn the FK key for the class it is written in (identifiant_field and identifiant_sport). InverseJoinColumn represent the FK of the other entity.  
 
