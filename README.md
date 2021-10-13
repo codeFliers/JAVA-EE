@@ -2487,7 +2487,7 @@ private List<Sport> sportsAllowed;
 ```
 
 ```
-    @ManyToMany(mappedBy = "allowedSport")
+    @ManyToMany(mappedBy = "sportsAllowed")
     private List<Field> compatibleFields;
 ```
 
