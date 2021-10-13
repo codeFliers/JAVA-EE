@@ -2486,6 +2486,7 @@ foreignKey=@ForeignKey(name="fk_sports"), nullable = false))
 private List<Sport> sportsAllowed;
 ```
 *Join table* => create the insertion table then with "joinColumns (fk master) +inverseJoinColumns (fk slave)", we complet it.  
+Join table represent the association table (fields_sports). JoinColumn the FK key for the class it is written in (identifiant_field and identifiant_sport). InverseJoinColumn represent the FK of the other entity.  
 
 SQL code: 
 ```
