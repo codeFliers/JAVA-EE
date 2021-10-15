@@ -2796,3 +2796,4 @@ oui u1=u2
 ```  
 To summary, for every access to a database row, it's already the same object that is returned to the app and in what context.  
 
+<a href="http://orm.bdpedia.fr/lectures.html">resources here</a>  
