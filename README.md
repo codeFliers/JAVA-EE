@@ -2640,3 +2640,159 @@ Next, we recover it from the session into a new persistent context, modify it an
 
 <a href="https://github.com/codeFliers/JAVA-EE/tree/main/Detached%20entity%20example%201">Example code here</a>  
 
+An ORM application dispose of 3 principal layers :  
+![image](https://user-images.githubusercontent.com/58827656/137515916-ea46c78b-ed9c-470f-b3b0-6f7a996efe3a.png)  
+
+The **applicative layer** and it's **transient objects**.  It does mean any objects without persistence.  
+The **ORM layer**  which include different elements:  
+-an objet **session** which establish a link with the **first level cache** (FLC) and the **relational database** of the next layer.  
+This *FLC* include persistent objects that form a *persistent graph of objects* linked to a particular session.  
+This session instantiate these different objects in concordence with the relational database following the queries.  
+-The **persistent layer** is made of persistent data but on the relational database level.  
+
+When we reach the database to get datas which will be converted as a transient object, the session watch out in the first place if this object corresponding to it isn't already into the *FLC*.  
+If it is the case, we retrieve the existing persistent object. Otherwise, the session query on the database and make a new object persistent.  
+
+A session is linked to his down FLC. As well as in case of a closing session and the creation of a new one, the references from the first (s1) will not be in the second (s2).  
+
+To differenciate an object to an other, we use the hash of the primary key and the table name.  
+
+An example:  
+```
+@Entity
+public class User implements Serializable {
+    private String nom;
+    private String prenom;
+
+    @Id
+    private Integer id;
+    public User() {
+
+    }
+
+    public String getNom() {
+        return nom;
+    }
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
+    public String getPrenom() {
+        return prenom;
+    }
+    public void setPrenom(String prenom) {
+        this.prenom = prenom;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+    private void setId(Integer id) {
+        this.id = id;
+    }
+}
+```
+At this moment, because there isn't any mean to differenciate one to an other, when i create 2 identical User objects, they will still be concidered different.  
+
+```
+public void test() {
+    Configuration configuration = new Configuration().configure("/hibernate.cfg.xml");
+    configuration.addAnnotatedClass(User.class);
+    ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()).build();
+    SessionFactory sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+    // Une iste des utilisateurs (Set => sans doublon)
+    Set<User> utilisateurs = new HashSet<>();
+
+    // Ouverture d'une première session
+    Session s1 = sessionFactory.openSession();
+
+    // On ajoute l'utilisateur 1 à la liste
+    User u1 = s1.load (User.class, 1);
+    utilisateurs.add(u1);
+
+    // Fermeture de s1
+    s1.close();
+
+    // Idem, avec une session 2
+    Session s2 =  sessionFactory.openSession();
+    User u2 = s2.load (User.class, 1);
+    utilisateurs.add(u2);
+
+    System.out.println("hashcode u1 "+u1.hashCode()); //1124360095
+    System.out.println("hashcode u2 "+u2.hashCode()); //675889995
+    System.out.println(u1.equals(u2) ? "oui u1=u2":"non u1!=u2"); // non //...
+}
+```
+
+We have an array which should as we want it to be, the size of 1 instead of 2. Our hashcode and equals are not right while we have the same datas.  
+
+We have to rewrite our 2 functions *hashcode* and *equals()* to take into concideration the right datas to compare :  
+
+```
+@Override
+public boolean equals(Object o) {
+    Boolean bool = false;
+    if(o != null && o instanceof User) {
+        User userParam = (User) o;
+
+        if(userParam.getId().equals(this.getId()) &&
+                userParam.getNom().equals(this.getNom()) &&
+                userParam.getPrenom().equals(this.getPrenom()))  {
+            bool = true;
+        }
+    }
+    return bool;
+}
+
+@Override
+public int hashCode() {
+    return Objects.hash(getNom(), getPrenom(), getId());
+}
+```
+
+Now, we have :  
+```
+System.out.println("Taille tableau "+utilisateurs.size()); // 1
+System.out.println("hashcode u1 "+u1.hashCode()); //1974052605
+System.out.println("hashcode u2 "+u2.hashCode()); //1974052605
+System.out.println(u1.equals(u2) ? "oui u1=u2":"non u1!=u2"); // oui ...
+```
+Another thing to mention, when we instantiate an object which we want persistent :  
+``` User u1 = s1.load (User.class, 1); ```
+Either it already exist in the FCL and our session will retrieve it direction from it.  
+Or, like here, the session will have to query to the database before persisting the returned data into an object in the cache.  
+Console result:  
+```
+Hibernate: select user0_.id as id1_0_0_, user0_.nom as nom2_0_0_, user0_.prenom as prenom3_0_0_ from User user0_ where user0_.id=?
+```
+Here, because we have 2 different sessions, the caches being not the same, while identical, we have 2 requests:  
+```
+Hibernate: select user0_.id as id1_0_0_, user0_.nom as nom2_0_0_, user0_.prenom as prenom3_0_0_ from User user0_ where user0_.id=?  
+Hibernate: select user0_.id as id1_0_0_, user0_.nom as nom2_0_0_, user0_.prenom as prenom3_0_0_ from User user0_ where user0_.id=?  
+```
+However, if we call for the same session an new object but which call the same primary key as the previous registered object into the cache, then there isn't any query :  
+```
+// On ajoute l'utilisateur 1 à la liste (inconnu donc requêtage)
+User u1 = s1.load (User.class, 1);
+utilisateurs.add(u1);
+//pas de requêtage (on connait déjà la clé primaire 1 d'u1 donc pas de requêtage)
+User u1Copy = s1.load (User.class, 2);
+utilisateurs.add(u1Copy);
+```
+Something to notice, with the overriding of hashcode and equals, if our two objects u1 and u2 were from the same session, then there would be no need to override them.  
+```
+// On ajoute l'utilisateur 1 à la liste (inconnu donc requêtage)
+User u1 = s1.load (User.class, 1);
+utilisateurs.add(u1);
+
+User u2 = s1.load (User.class, 1);
+utilisateurs.add(u2);
+```  
+```
+Taille tableau 1
+hashcode u1 1124360095
+hashcode u2 1124360095
+oui u1=u2
+```  
+To summary, for every access to a database row, it's already the same object that is returned to the app and in what context.  
+
