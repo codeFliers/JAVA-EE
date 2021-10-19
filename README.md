@@ -1767,6 +1767,7 @@ A transaction have to follow the ACID properties:
 
 (1): A = 10 and B = 10. A gives 10 to B but while A is now 0, B isn't 20.  
 (2): A = 50 and B = 50. A + B should always be 100. If A+B=90 then it is not concistent.  
+(2): If an object A is persistent while having other objects in it that are not, it cause an issue.  
 (3): A = 10 and B = 10. T1 : A gives 5 to B. T2 : B gives 15 to A.  If at one point, B gives 15 to A before it does receive the extra 5 from A, something is wrong.  
 (4): Something happen at one point during the transaction. The user receive the confirmation while the transaction failed.  
 
