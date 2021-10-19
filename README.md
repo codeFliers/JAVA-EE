@@ -2775,6 +2775,14 @@ If a Town is persisted or removed, then mayor will automatically be too.
 
 <a href="http://blog.paumard.org/cours/jpa/chap03-entite-relation.html">Example here 4.7</a>  
 
+**Persist** :  when persist() is called, every secondary entites will persist too.  
+**Remove** : remove() will be propagated to every secondary entities.  
+**MERGE** : equivalent to 'saveOrUpdate()'. It will insert if it doesn't exist or override what already exist.  
+**REFRESH** : synchronize the object (read only).  
+**ALL** : all previous options.  
+
+It is possible to use multiple ones at once : *cascade = {CascadeType.PERSIST, CascadeType.MERGE}*  
+
 **Detached entity**  
 
 Being de detached entity mean to *not being attached to a persistant context*, so without any link with a database.  
