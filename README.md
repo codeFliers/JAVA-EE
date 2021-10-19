@@ -1759,6 +1759,51 @@ Different types of transaction mod exist:
 -*not reproductibl*e read (TRANSACTION_READ_COMITTED) (first transaction read a line followed up by an other transaction reading the same line. The first update the value as the second one is doing the same)  
 -*ghost read*   (TRANSACTION_REPEATABLE_READ) (first transaction recover a resultset from x sql request just before an other transaction update data concerning the same x. If the first transaction sql happen again, it will more data)  
 
+A transaction have to follow the ACID properties:  
+-**Atomicity (1)**: a transaction is either 100 % good or avorted.   
+-**Consistency (2)**:   consistency between transaction of the system in place.  
+-**Isolation (3)**:   transactions are isolated from one to an other (concurrent).  
+-**Durability (4)**:   a successfull change made to the database (transaction) will remain permanently.  
+
+(1): A = 10 and B = 10. A gives 10 to B but while A is now 0, B isn't 20.  
+(2): A = 50 and B = 50. A + B should always be 100. If A+B=90 then it is not concistent.  
+(3): A = 10 and B = 10. T1 : A gives 5 to B. T2 : B gives 15 to A.  If at one point, B gives 15 to A before it does receive the extra 5 from A, something is wrong.  
+(4): Something happen at one point during the transaction. The user receive the confirmation while the transaction failed.  
+
+*Small transaction example*:  
+```
+// 1 - Transcient object  (java / garbage collector)
+        Pays pays = new Pays();
+        pays.setCode("is");
+        pays.setLangue("Islandais");
+        pays.setNom("Islande");
+
+// 2 - object trying to be persistent (into the cache)
+        Transaction tx = null;
+        try {
+	        //start transaction and link it to the ongoing session
+                tx = session.beginTransaction();
+                //save the object into the cache where persistent object are (data graph)
+                session.save(pays);
+                //commit the change to the database (not dirty anymore)
+                tx.commit();
+// 2.1 - may fail (rollback to the previous valid state)		
+        } catch (RuntimeException e) {
+                if (tx != null)
+                        tx.rollback();
+                throw e; // Gérer le message (log, affichage, etc.)
+        } finally {
+	        //sessions's objects are now detached
+                session.close();
+        }
+
+// 3 - 'pays' is now detached from the session because it is close (detached = persistent + session close())  
+```
+A persistent object but not yet commited is concidered "**dirty**".  
+
+![image](https://user-images.githubusercontent.com/58827656/137880534-efac13e3-e87f-481c-8e4b-a5448ea95b36.png)  
+
+
 *Example of a simple transaction*:  
 ```  
 @WebServlet(name = "TransactionServlet", value = "/TransactionServlet")
@@ -1906,9 +1951,9 @@ His role is to manage the different entities within these contexts.  It can :
 
 There are different types of entities:  
 - *transient entity* (it doesn't exist yet in the database, isn't in a persistency context yet and doesn't have a persistency identity yet).  
-- *managed entity* (complet opposite of the previous entity described).  
+- *managed entity / persistent entity* (complet opposite of the previous entity described). If we want a persistent object with an already known id into the db then we use saveOrUpdate().  
 - *detached entity* (like the previous entity described except the persistency context is close).  
-- *deleted entity* (doesn't exist in a *persistency context* and have not yet been deleted from the database).    
+- *deleted entity* (doesn't exist in a *persistency context* and **may have not yet been** deleted from the database).    
 
 *Transaction* are managed by the JTA (*Java Transaction API*). Tomcat doesn't implement it but it can be use manually by an object that implement the interface "*EntityTransaction*".
 
