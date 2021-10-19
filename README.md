@@ -2526,6 +2526,107 @@ SQL code:
 
 ![OneToManyUniBe](https://user-images.githubusercontent.com/58827656/136944426-f8da535e-3412-4d4b-999d-28eabc0c7ff6.png)  
 
+**READS OPTIMIZATION**  
+When we "navigate" into the application, we generate SQL requests which will progressively formulate a data graph (level 2).  
+To minimize the numbers of SQL req, while we already know in advance the data involved, we can anticipate and materialize the data graph with the right datas.  
+
+This anticipation go through différents strategies : *lazy*, *eager* (see below). It works on 2 levels :  
+-*mapping configuration via JPA annotation*  
+-*while executing HQL request with the option fetch to materialize the data graph in advance*  
+
+The first one generalize a strategy what-ever the ongoing situation wherease the second one "override" it to answere specific situations.  
+
+By default, *@ManyToOne* go through the eager mod (glouton).  
+It means that if a class own one or multiple times this annotation then it will load by default the différents objects linked to it (main entity / secondary entity).  
+
+For exemple, if we want to find a specific movie but we use only one parameter from it in a view later on ( *${film.titre}* ), will will have useless requests.  
+
+```
+@ManyToOne
+@JoinColumn(name="id_realisateur")
+private Artiste realisateur;
+
+@ManyToOne
+@JoinColumn(name="code_pays")
+private Pays pays;
+
+@Embedded
+private Genre genre;
+```
+![image](https://user-images.githubusercontent.com/58827656/137868298-d10a2901-9150-462e-acdc-ec20c484c11c.png)  
+We do have 3 useless join.  
+
+If we use HQL instead to draw the 2 next attributes : film.titre and film.realisateur.nom :  
+![image](https://user-images.githubusercontent.com/58827656/137868332-9497e637-c275-47d1-8663-dadf36083d51.png)  
+
+Only the third is usefull (1/3) to find the film maker name.  
+
+If we add the annotation *(fetch=FetchType.LAZY)* to the *@ManyToOne*, we will load only the strict minimum.  
+In the first case :  
+![image](https://user-images.githubusercontent.com/58827656/137868361-83057646-d298-4915-b14e-0d613c7df735.png)  
+Problem, in the second case, we have 2 requests instead of 1 :  
+![image](https://user-images.githubusercontent.com/58827656/137868378-5be77f4d-ffa0-4c4d-99a8-80ef21e6ae1e.png)  
+```
+SELECT f
+FROM Film f, Artiste a
+WHERE f.realisateur = a
+AND f.titre = 'Vertigo'
+
+select f 
+from Film f 
+join f.realisateur
+where f.titre='Vertigo'
+```  
+We have to use *"fetch"* (aller chercher) :  
+```
+select f 
+from Film f 
+join fetch f.realisateur
+where f.titre='Vertigo'
+
+Hibernate: select […] from Film film0_ inner join Artiste artiste1_ on film0_.id_realisateur=artiste1_.id where film0_.titre=?
+```  
+On the opposite to the request :  
+![image](https://user-images.githubusercontent.com/58827656/137868438-09d271a7-94f7-4278-97f3-81c812e397cb.png)  
+
+We don't signal that we want to load the data graph (cache) of the Artiste realisateur from Film.  
+**JPA/HIBERNATE STRATEGIES**  
+
+Vocabularies:  
+**Film** is a *main entity* to which is associate *secondaries entity* (*@xToOne*) like *pays* and *realisateur*.  
+The annotation *@xToMany* designates a *collection*, here *roles*.  
+![image](https://user-images.githubusercontent.com/58827656/137868485-e74cf620-c47b-4900-be0f-ac9a0e6cfb2b.png)  
+
+Our 2 mains strategies to load to the data graph :  
+-**Eager** : load entity and collection the soonest into the data graph.  
+We associates the sonnest possible the secondaries entities to the mains ones.  
+It goes through outer joins and some simple requests if it is not enough.  
+-**Lazy** : load entity and collection as late as possible into the data graph.  
+By default, JPA load **entities** with **eager** and the **collections**  with **Lazy**.  
+
+In our example, realisateur, pays and genre are EAGER while roles is LAZY.  
+![image](https://user-images.githubusercontent.com/58827656/137868534-fc902486-2b2c-4bef-896d-8b99cdc1d0c8.png)
+
+**/!\ use lazy on the mapping level and fetch (eager) on a HQL level /!\**  
+
+![image](https://user-images.githubusercontent.com/58827656/137868557-ffd36d24-8623-4830-8e75-ab1f861389d1.png)  
+
+There is an issue name "1+n requests" with collection. Because they use the LAZY mod by default, it implies massive queries if we work on collection.  
+If we want by example, see the list of films and their notations, we need first to select all the movies in SQL then do one request at a time for every movies…
+One time :  
+![image](https://user-images.githubusercontent.com/58827656/137868582-70649fa9-381f-4be5-93d6-616fe54aa476.png)  
+As many times as there are movies :  
+![image](https://user-images.githubusercontent.com/58827656/137868614-e1ad6134-9378-4722-80e3-07f6080291f0.png)  
+To mitigate it, we gonna use one HQL request to do the same as the SQL one and add *fetch* to load up the movies and their annotations into the cache.  
+SQL :  
+![image](https://user-images.githubusercontent.com/58827656/137868636-109219c3-eb6e-4c2d-87ca-fb74a03fd33b.png)  
+Will become with HQL:  
+![image](https://user-images.githubusercontent.com/58827656/137868670-71c52438-d02b-4e1d-bc05-0b81b7532a50.png)  
+
+<a href="http://orm.bdpedia.fr/optimisation.html">Credit</a>  
+
+
+
 **SIMPLE TRANSACTION**  
 In this simple example, we will see : register, modify and delete information.  
 We start by creating a persistence context:  
