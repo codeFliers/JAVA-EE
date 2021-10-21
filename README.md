@@ -1762,7 +1762,7 @@ Different types of transaction mod exist:
 A transaction have to follow the ACID properties:  
 -**Atomicity (1)**: a transaction is either 100 % good or avorted.   
 -**Consistency (2)**:   consistency between transaction of the system in place.  
--**Isolation (3)**:   transactions are isolated from one to an other (concurrent).  
+-**Isolation (3)**:   transactions "seem" isolated from one to an other (concurrent).  
 -**Durability (4)**:   a successfull change made to the database (transaction) will remain permanently.  
 
 (1): A = 10 and B = 10. A gives 10 to B but while A is now 0, B isn't 20.  
