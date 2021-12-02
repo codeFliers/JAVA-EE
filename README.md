@@ -2070,13 +2070,12 @@ The "DiscriminatorColumn" is a variable created by the annotation that will have
 -Names of variables have to be différent.  
 
 In this example, we will have **3 classes** : **Person** which is *extended* by **Mayor** which have a *OneToOne* relationship with **Town**.  
-![image](![image](https://user-images.githubusercontent.com/58827656/144386366-84a239bf-59bc-4d24-bcf1-3b7894807bc0.png))  
+![image](https://user-images.githubusercontent.com/58827656/144386366-84a239bf-59bc-4d24-bcf1-3b7894807bc0.png)  
 
 Person and Mayor are only one table now. The *@OneToOne* relation on the *Town town* object has been translated to a *Foreign key* referencing id from town.  
 
 A *Mayor* handle only one *Town* at a time.  
 A *Town* is handle by only one *Mayor* at a time.
-
 
 One down side, the *town_id* can be **null** when the Person is not a Mayor. If he isn't anymore, he will have to be removed too.  
 <a href=http://blog.paumard.org/cours/jpa/chap05-heritage-single-table.html>Source here</a>  
