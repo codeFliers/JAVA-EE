@@ -2494,7 +2494,7 @@ SQL code is the same as in the @OneToMany example.
 
 
 **1:N BIDIRECTIONAL relationship**  
-It look a lot like the unidirectional code. It is a conjonction of *@OneToMany* and *@ManyToMany* with the parameter *@mappedBy* on the *@OneToMany* annotation.  
+It look a lot like the unidirectional code. It is a conjonction of *@OneToMany* and *@ManyToOne* with the parameter *@mappedBy* on the *@OneToMany* annotation.  
 When we have *bidirectional*, we use *@mappedBy* to translate it.  
 ![image](https://user-images.githubusercontent.com/58827656/135053581-9b694887-680e-45d7-bebd-3ef0f3e205e1.png)
 
